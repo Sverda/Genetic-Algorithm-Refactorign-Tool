@@ -12,13 +12,13 @@ namespace GenSharp
             Console.WriteLine(ComputeIndex());
         }
 
-        private static int ComputeIndex()
+        private static double ComputeIndex()
         {
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(GenerateMetricsForProject());
             var metricNode = xmlDoc.SelectSingleNode($"//Method[contains(@Name, '{new MISettings().TargetMethodName}')]/Metrics/Metric[@Name = 'MaintainabilityIndex']");
             var miValue = metricNode.Attributes["Value"].Value;
-            if (!int.TryParse(miValue, out int mi))
+            if (!double.TryParse(miValue, out double mi))
             {
                 throw new ArgumentException("Can't parse value returned from ms metrics");
             }
