@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Configuration;
 
-namespace GenSharp
+namespace GenSharp.Metrics.Helpers
 {
-    class MISettings
+    internal class MaintainabilityIndexSettings
     {
         private const string _miKey = "MaintainabilityIndexToolPath";
         private const string _csprojPath = "csprojPath";
@@ -15,7 +15,7 @@ namespace GenSharp
 
         public string TargetMethodName { get; }
 
-        public MISettings()
+        public MaintainabilityIndexSettings()
         {
             MetricsExecutablePath = ConfigurationManager.AppSettings[_miKey];
             if (string.IsNullOrEmpty(MetricsExecutablePath))

@@ -1,24 +1,28 @@
-﻿using System;
+﻿using GenSharp.Metrics.Abstractions;
+using GenSharp.Metrics.Helpers;
+using System;
 using System.Diagnostics;
 using System.Text;
 using System.Xml;
 
-namespace GenSharp
+namespace GenSharp.Metrics.Implementations
 {
-    class Program
+    public class MaintainabilityIndexMetrics : IEvaluateMetric
     {
-        static void Main(string[] args)
+        private readonly MaintainabilityIndexSettings _settings;
+
+        public MaintainabilityIndexMetrics()
         {
-            Console.WriteLine(ComputeIndex());
+            _settings = new MaintainabilityIndexSettings();
         }
 
-        private static double ComputeIndex()
+        public double Evaluate()
         {
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(GenerateMetricsForProject());
-            var metricNode = xmlDoc.SelectSingleNode($"//Method[contains(@Name, '{new MISettings().TargetMethodName}')]/Metrics/Metric[@Name = 'MaintainabilityIndex']");
+            var metricNode = xmlDoc.SelectSingleNode($"//Method[contains(@Name, '{_settings.TargetMethodName}')]/Metrics/Metric[@Name = 'MaintainabilityIndex']");
             var miValue = metricNode.Attributes["Value"].Value;
-            if (!double.TryParse(miValue, out double mi))
+            if (!double.TryParse(miValue, out var mi))
             {
                 throw new ArgumentException("Can't parse value returned from ms metrics");
             }
@@ -26,14 +30,14 @@ namespace GenSharp
             return mi;
         }
 
-        private static string GenerateMetricsForProject()
+        private string GenerateMetricsForProject()
         {
             var process = new Process()
             {
                 StartInfo = new ProcessStartInfo()
                 {
-                    FileName = new MISettings().MetricsExecutablePath,
-                    Arguments = $"/project:{new MISettings().TargetProjectPath} /quiet",
+                    FileName = _settings.MetricsExecutablePath,
+                    Arguments = $"/project:{_settings.TargetProjectPath} /quiet",
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardOutput = true
