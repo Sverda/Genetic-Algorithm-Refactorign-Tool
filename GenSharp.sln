@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenSharp.Console", "src\Gen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenSharp.Metrics", "src\GenSharp.Metrics\GenSharp.Metrics.csproj", "{61B5705B-0EBE-4F85-A41D-8AFFC9DBFB79}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenSharp.Refactorings", "src\GenSharp.Refactorings\GenSharp.Refactorings.csproj", "{0503A987-A30D-4CF1-9439-6A9CCFDD4FAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{61B5705B-0EBE-4F85-A41D-8AFFC9DBFB79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61B5705B-0EBE-4F85-A41D-8AFFC9DBFB79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61B5705B-0EBE-4F85-A41D-8AFFC9DBFB79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0503A987-A30D-4CF1-9439-6A9CCFDD4FAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0503A987-A30D-4CF1-9439-6A9CCFDD4FAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0503A987-A30D-4CF1-9439-6A9CCFDD4FAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0503A987-A30D-4CF1-9439-6A9CCFDD4FAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
