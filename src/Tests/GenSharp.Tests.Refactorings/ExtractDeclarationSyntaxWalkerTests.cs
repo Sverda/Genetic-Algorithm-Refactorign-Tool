@@ -1,8 +1,7 @@
 ﻿using GenSharp.Refactorings;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Diagnostics;
 
 namespace GenSharp.Tests.Refactorings
 {
@@ -12,47 +11,59 @@ namespace GenSharp.Tests.Refactorings
         [TestMethod]
         public void ExtractDeclarationWithTwoParameters()
         {
-            Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
-
             const string source = @"
-            double CalculateTotal(int quantity, int itemPrice)
+            class Calculations
             {
-                double basePrice = quantity * itemPrice;
+                double CalculateTotal(int quantity, int itemPrice)
+                {
+                    double basePrice = quantity * itemPrice;
 
-                if (basePrice > 1000)
-                {
-                    return basePrice * 0.95;
-                }
-                else
-                {
-                    return basePrice * 0.98;
+                    if (basePrice > 1000)
+                    {
+                        return basePrice * 0.95;
+                    }
+                    else
+                    {
+                        return basePrice * 0.98;
+                    }
                 }
             }";
-            var tree = CSharpSyntaxTree.ParseText(source);
 
-            new ExtractDeclarationSyntaxWalker().Visit(tree.GetRoot());
-
-            var actual = tree.ToString();
+            GetSemanticModel(source, out var tree, out var model);
+            var result = new ExtractDeclarationSyntaxRewriter(model).Visit(tree.GetRoot());
 
             const string expected = @"
-            double CalculateTotal(int quantity, int itemPrice)
+            class Calculations
             {
-                if (basePrice(quantity, itemPrice) > 1000)
+                double CalculateTotal(int quantity, int itemPrice)
                 {
-                    return basePrice(quantity, itemPrice) * 0.95;
+                    if (basePrice(quantity, itemPrice) > 1000)
+                    {
+                        return basePrice(quantity, itemPrice) * 0.95;
+                    }
+                    else
+                    {
+                        return basePrice(quantity, itemPrice) * 0.98;
+                    }
                 }
-                else
-                {
-                    return basePrice(quantity, itemPrice) * 0.98;
-                }
-            }
 
-            double basePrice(int q, int i)
-            {
-                return q * i;
+                double basePrice(int quantity, int itemPrice)
+                {
+                    return quantity * itemPrice;
+                }
             }";
 
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(expected, result.ToString());
+        }
+
+        private static void GetSemanticModel(string source, out SyntaxTree tree, out SemanticModel model)
+        {
+            tree = CSharpSyntaxTree.ParseText(source);
+            var compilation = CSharpCompilation
+                .Create("GenSharp.Tests.Refactorings")
+                .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+                .AddSyntaxTrees(tree);
+            model = compilation.GetSemanticModel(tree);
         }
     }
 }

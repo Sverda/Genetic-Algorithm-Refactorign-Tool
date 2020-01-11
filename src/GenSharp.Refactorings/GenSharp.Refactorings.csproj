@@ -75,7 +75,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExtractDeclarationSyntaxWalker.cs" />
+    <Compile Include="ExtractDeclarationSyntaxRewriter.cs" />
+    <Compile Include="GenerateMethodFromStatementSyntaxWalker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
