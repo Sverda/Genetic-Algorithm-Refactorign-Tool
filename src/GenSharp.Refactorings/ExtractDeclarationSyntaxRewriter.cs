@@ -12,6 +12,8 @@ namespace GenSharp.Refactorings
 
         private readonly GenerateMethodFromStatementSyntaxWalker _methodGenerator;
 
+        private ClassDeclarationSyntax _currentClassNode;
+
         public ExtractDeclarationSyntaxRewriter(SemanticModel semanticModel)
         {
             _semanticModel = semanticModel;
@@ -20,31 +22,28 @@ namespace GenSharp.Refactorings
 
         public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            _methodGenerator.Visit(node.SyntaxTree.GetRoot());
+            _currentClassNode = node;
+            _methodGenerator.Visit(_currentClassNode.SyntaxTree.GetRoot());
 
-            var classDeclaration = RemoveVariableDeclarations(node);
-            classDeclaration = InsertExtractedMethods(classDeclaration);
-            classDeclaration = ReplaceVariableCallsWithMethodCalls(classDeclaration);
-            return classDeclaration;
+            RemoveVariableDeclarations();
+            InsertExtractedMethods();
+            ReplaceVariableCallsWithMethodCalls();
+            return _currentClassNode;
         }
 
-        private ClassDeclarationSyntax RemoveVariableDeclarations(ClassDeclarationSyntax node)
+        private void RemoveVariableDeclarations()
         {
-            var nodeWithoutDeclarations = node;
-
             var parentTargetNodes = _methodGenerator.ExtractedStatements.Select(m => m.TargetStatement.Parent);
-            nodeWithoutDeclarations = nodeWithoutDeclarations.TrackNodes(parentTargetNodes);
-            nodeWithoutDeclarations = RemoveLeadingLine(nodeWithoutDeclarations, nodeWithoutDeclarations.GetCurrentNodes(parentTargetNodes));
-            nodeWithoutDeclarations = nodeWithoutDeclarations.RemoveNodes(nodeWithoutDeclarations.GetCurrentNodes(parentTargetNodes), SyntaxRemoveOptions.KeepNoTrivia);
-
-            return nodeWithoutDeclarations;
+            _currentClassNode = _currentClassNode.TrackNodes(parentTargetNodes);
+            RemoveLeadingLine(_currentClassNode.GetCurrentNodes(parentTargetNodes));
+            _currentClassNode = _currentClassNode.RemoveNodes(_currentClassNode.GetCurrentNodes(parentTargetNodes), SyntaxRemoveOptions.KeepNoTrivia);
         }
 
-        private static ClassDeclarationSyntax RemoveLeadingLine(ClassDeclarationSyntax node, IEnumerable<SyntaxNode> parentTargetNodes)
+        private void RemoveLeadingLine(IEnumerable<SyntaxNode> parentTargetNodes)
         {
             foreach (var parentTargetNode in parentTargetNodes)
             {
-                var nextSibling = GetNextNode(parentTargetNode);
+                var nextSibling = parentTargetNode.GetNextNode();
                 var emptyLineTrivia = nextSibling.DescendantTrivia().First();
                 if (!emptyLineTrivia.IsKind(SyntaxKind.EndOfLineTrivia))
                 {
@@ -52,37 +51,24 @@ namespace GenSharp.Refactorings
                 }
 
                 var siblingWithoutLeadingLine = nextSibling.ReplaceTrivia(emptyLineTrivia, new SyntaxTrivia());
-                node = node.ReplaceNode(nextSibling, siblingWithoutLeadingLine);
+                _currentClassNode = _currentClassNode.ReplaceNode(nextSibling, siblingWithoutLeadingLine);
             }
-
-            return node;
         }
 
-        private static SyntaxNode GetNextNode(SyntaxNode parentTargetNode)
-        {
-            var childNodes = parentTargetNode.Parent.ChildNodes().ToList();
-            return childNodes
-                .Zip(childNodes.Skip(1), (c, n) => (Current: c, Next: n))
-                .Last(t => t.Current == parentTargetNode).Next;
-        }
-
-        private ClassDeclarationSyntax InsertExtractedMethods(ClassDeclarationSyntax node)
+        private void InsertExtractedMethods()
         {
             var members = _methodGenerator.ExtractedStatements.Select(model => model.Method).ToArray();
-            var classDeclarationSyntax = node.AddMembers(members);
-            return classDeclarationSyntax;
+            _currentClassNode = _currentClassNode.AddMembers(members);
         }
 
-        private ClassDeclarationSyntax ReplaceVariableCallsWithMethodCalls(ClassDeclarationSyntax node)
+        private void ReplaceVariableCallsWithMethodCalls()
         {
-            var nodeWithReplacedVariables = node;
             foreach (var model in _methodGenerator.ExtractedStatements)
             {
                 var variableName = model.TargetStatement.DescendantNodes().OfType<VariableDeclaratorSyntax>().Select(s => s.Identifier).Single();
-                var variableUses = nodeWithReplacedVariables.DescendantNodes().OfType<IdentifierNameSyntax>().Where(i => i.Identifier.Value.Equals(variableName.Value));
-                nodeWithReplacedVariables = nodeWithReplacedVariables.ReplaceNodes(variableUses, (original, replaced) => model.Call.Expression);
+                var variableUses = _currentClassNode.DescendantNodes().OfType<IdentifierNameSyntax>().Where(i => i.Identifier.Value.Equals(variableName.Value));
+                _currentClassNode = _currentClassNode.ReplaceNodes(variableUses, (original, replaced) => model.Call.Expression);
             }
-            return nodeWithReplacedVariables;
         }
     }
 }
