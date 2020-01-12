@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GenSharp.Refactorings
@@ -21,18 +22,48 @@ namespace GenSharp.Refactorings
         {
             _methodGenerator.Visit(node.SyntaxTree.GetRoot());
 
-            var classDeclaration = RemoveVariableDeclaration(node);
+            var classDeclaration = RemoveVariableDeclarations(node);
             classDeclaration = InsertExtractedMethods(classDeclaration);
             classDeclaration = ReplaceVariableCallsWithMethodCalls(classDeclaration);
             return classDeclaration;
         }
 
-        private ClassDeclarationSyntax RemoveVariableDeclaration(ClassDeclarationSyntax node)
+        private ClassDeclarationSyntax RemoveVariableDeclarations(ClassDeclarationSyntax node)
         {
-            var nodeWithoutStatements = node;
-            var nodes = _methodGenerator.ExtractedStatements.Select(m => m.TargetStatement.Parent);
-            nodeWithoutStatements = nodeWithoutStatements.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia);
-            return nodeWithoutStatements;
+            var nodeWithoutDeclarations = node;
+
+            var parentTargetNodes = _methodGenerator.ExtractedStatements.Select(m => m.TargetStatement.Parent);
+            nodeWithoutDeclarations = nodeWithoutDeclarations.TrackNodes(parentTargetNodes);
+            nodeWithoutDeclarations = RemoveLeadingLine(nodeWithoutDeclarations, nodeWithoutDeclarations.GetCurrentNodes(parentTargetNodes));
+            nodeWithoutDeclarations = nodeWithoutDeclarations.RemoveNodes(nodeWithoutDeclarations.GetCurrentNodes(parentTargetNodes), SyntaxRemoveOptions.KeepNoTrivia);
+
+            return nodeWithoutDeclarations;
+        }
+
+        private static ClassDeclarationSyntax RemoveLeadingLine(ClassDeclarationSyntax node, IEnumerable<SyntaxNode> parentTargetNodes)
+        {
+            foreach (var parentTargetNode in parentTargetNodes)
+            {
+                var nextSibling = GetNextNode(parentTargetNode);
+                var emptyLineTrivia = nextSibling.DescendantTrivia().First();
+                if (!emptyLineTrivia.IsKind(SyntaxKind.EndOfLineTrivia))
+                {
+                    continue;
+                }
+
+                var siblingWithoutLeadingLine = nextSibling.ReplaceTrivia(emptyLineTrivia, new SyntaxTrivia());
+                node = node.ReplaceNode(nextSibling, siblingWithoutLeadingLine);
+            }
+
+            return node;
+        }
+
+        private static SyntaxNode GetNextNode(SyntaxNode parentTargetNode)
+        {
+            var childNodes = parentTargetNode.Parent.ChildNodes().ToList();
+            return childNodes
+                .Zip(childNodes.Skip(1), (c, n) => (Current: c, Next: n))
+                .Last(t => t.Current == parentTargetNode).Next;
         }
 
         private ClassDeclarationSyntax InsertExtractedMethods(ClassDeclarationSyntax node)
