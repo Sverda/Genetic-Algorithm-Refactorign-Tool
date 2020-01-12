@@ -1,8 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Diagnostics;
 using System.Linq;
 
 namespace GenSharp.Refactorings
@@ -21,48 +19,29 @@ namespace GenSharp.Refactorings
 
         public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
         {
+            var classDeclaration = InsertExtractedMethods(node);
+            classDeclaration = ReplaceStatementWithCalls(classDeclaration);
+            return classDeclaration;
+        }
+
+        private ClassDeclarationSyntax InsertExtractedMethods(ClassDeclarationSyntax node)
+        {
             _methodGenerator.Visit(node.SyntaxTree.GetRoot());
-            var members = _methodGenerator.NodeMethodPairs.Select(pair => pair.Method).ToArray();
+            var members = _methodGenerator.ExtractedStatements.Select(model => model.Method).ToArray();
             var classDeclarationSyntax = node.AddMembers(members);
             return classDeclarationSyntax;
         }
 
-        private SyntaxNode MakeACall(MethodDeclarationSyntax method)
+        private ClassDeclarationSyntax ReplaceStatementWithCalls(ClassDeclarationSyntax node)
         {
-            var className = GetClassIdentifier(method);
-            var methodName = SyntaxFactory.IdentifierName(method.Identifier);
-            var memberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, className, methodName);
-
-            //TODO: Parse parameters to arguments
-            var argument = SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("A")));
-            var argumentList = SyntaxFactory.SeparatedList(new[] { argument });
-
-            var methodCall = SyntaxFactory.ExpressionStatement(
-                    SyntaxFactory.InvocationExpression(memberAccess, SyntaxFactory.ArgumentList(argumentList))
-                );
-
-            Trace.WriteLine(methodCall.ToFullString());
-
-            return methodCall;
-        }
-
-        private static IdentifierNameSyntax GetClassIdentifier(MethodDeclarationSyntax method)
-        {
-            var ancestors = method.Ancestors().ToList();
-            if (!ancestors.Any())
+            var nodeWithReplacedStatements = node;
+            foreach (var model in _methodGenerator.ExtractedStatements)
             {
-                throw new ArgumentException("No ancestors");
+                var variableName = model.Statement.DescendantNodes().OfType<VariableDeclaratorSyntax>().Select(s => s.Identifier).Single();
+                var variableUses = nodeWithReplacedStatements.DescendantNodes().OfType<IdentifierNameSyntax>().Where(i => i.Identifier.Value.Equals(variableName.Value));
+                nodeWithReplacedStatements = (ClassDeclarationSyntax)nodeWithReplacedStatements.SyntaxTree.GetRoot().ReplaceNodes(variableUses, (original, replaced) => model.Call.Expression);
             }
-
-            var parent = ancestors.First();
-            var isClassType = parent is ClassDeclarationSyntax;
-            if (!isClassType)
-            {
-                throw new ArgumentException("Direct ancestor is not a class");
-            }
-
-            var containingClass = (ClassDeclarationSyntax)parent;
-            return SyntaxFactory.IdentifierName(containingClass.Identifier);
+            return nodeWithReplacedStatements;
         }
     }
 }

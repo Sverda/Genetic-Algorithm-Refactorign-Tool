@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace GenSharp.Refactorings
@@ -10,22 +11,27 @@ namespace GenSharp.Refactorings
     {
         private readonly SemanticModel _semanticModel;
 
-        public List<(SyntaxNode Node, MethodDeclarationSyntax Method)> NodeMethodPairs { get; private set; }
+        public List<ExtractedStatementModel> ExtractedStatements { get; private set; }
 
         public GenerateMethodFromStatementSyntaxWalker(SemanticModel semanticModel) : base(SyntaxWalkerDepth.Node)
         {
             _semanticModel = semanticModel;
 
-            NodeMethodPairs = new List<(SyntaxNode, MethodDeclarationSyntax)>();
+            ExtractedStatements = new List<ExtractedStatementModel>();
         }
 
         public override void VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
-            NodeMethodPairs.Add((node, MethodWithParameters(node)));
+            var model = new ExtractedStatementModel();
+            model.Statement = node;
+            model.Method = MethodWithParameters(node);
+            model.Call = Call(model.Method);
+            ExtractedStatements.Add(model);
 
             base.VisitVariableDeclaration(node);
         }
 
+        //TODO: Move it to other class
         private MethodDeclarationSyntax MethodWithParameters(VariableDeclarationSyntax node)
         {
             var methodName = node.Variables.Where(v => !string.IsNullOrEmpty(v.Identifier.Text)).Select(v => v.Identifier.Text).Single();
@@ -55,6 +61,31 @@ namespace GenSharp.Refactorings
             }
 
             return parameters;
+        }
+
+        private ExpressionStatementSyntax Call(MethodDeclarationSyntax method)
+        {
+            var className = GetClassIdentifier();
+            var methodName = SyntaxFactory.IdentifierName(method.Identifier);
+            var memberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, className, methodName);
+
+            //TODO: Parse parameters to arguments
+            var argument = SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("A")));
+            var argumentList = SyntaxFactory.SeparatedList(new[] { argument });
+
+            var methodCall = SyntaxFactory.ExpressionStatement
+            (
+                SyntaxFactory.InvocationExpression(memberAccess, SyntaxFactory.ArgumentList(argumentList))
+            );
+
+            Trace.WriteLine(methodCall.ToFullString());
+
+            return methodCall;
+        }
+
+        private static IdentifierNameSyntax GetClassIdentifier()
+        {
+            return SyntaxFactory.IdentifierName(SyntaxFactory.Identifier("this"));
         }
     }
 }

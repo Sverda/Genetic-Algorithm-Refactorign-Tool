@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExtractDeclarationSyntaxRewriter.cs" />
+    <Compile Include="ExtractedStatementModel.cs" />
     <Compile Include="GenerateMethodFromStatementSyntaxWalker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
