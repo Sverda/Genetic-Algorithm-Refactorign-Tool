@@ -5,7 +5,7 @@ namespace GenSharp.Refactorings
 {
     class ExtractedStatementModel
     {
-        public SyntaxNode Statement { get; set; }
+        public SyntaxNode TargetStatement { get; set; }
 
         public MethodDeclarationSyntax Method { get; set; }
 

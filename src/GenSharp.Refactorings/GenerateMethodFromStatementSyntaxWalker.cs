@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace GenSharp.Refactorings
@@ -23,7 +22,7 @@ namespace GenSharp.Refactorings
         public override void VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
             var model = new ExtractedStatementModel();
-            model.Statement = node;
+            model.TargetStatement = node;
             model.Method = MethodWithParameters(node);
             model.Call = Call(model.Method);
             ExtractedStatements.Add(model);
@@ -77,8 +76,6 @@ namespace GenSharp.Refactorings
             (
                 SyntaxFactory.InvocationExpression(memberAccess, SyntaxFactory.ArgumentList(argumentList))
             );
-
-            Trace.WriteLine(methodCall.ToFullString());
 
             return methodCall;
         }
