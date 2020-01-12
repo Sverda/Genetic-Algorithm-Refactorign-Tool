@@ -46,11 +46,11 @@ namespace GenSharp.Refactorings
             return methodRoot;
         }
 
-        private List<ParameterSyntax> Parameters(ExpressionSyntax returnExpression)
+        private List<ParameterSyntax> Parameters(ExpressionSyntax expression)
         {
             var parameters = new List<ParameterSyntax>();
 
-            var identifiers = returnExpression.DescendantTokens().Where(t => t.IsKind(SyntaxKind.IdentifierToken));
+            var identifiers = expression.DescendantTokens().Where(t => t.IsKind(SyntaxKind.IdentifierToken));
             foreach (var identifier in identifiers)
             {
                 var identifierType = _semanticModel.GetTypeInfo(identifier.Parent).Type;
@@ -64,25 +64,33 @@ namespace GenSharp.Refactorings
 
         private ExpressionStatementSyntax Call(MethodDeclarationSyntax method)
         {
-            var className = GetClassIdentifier();
-            var methodName = SyntaxFactory.IdentifierName(method.Identifier);
-            var memberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, className, methodName);
+            var argumentsList = Arguments(method);
 
-            //TODO: Parse parameters to arguments
-            var argument = SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("A")));
-            var argumentList = SyntaxFactory.SeparatedList(new[] { argument });
+            var memberAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.ThisExpression(),
+                SyntaxFactory.IdentifierName(method.Identifier)
+            );
 
             var methodCall = SyntaxFactory.ExpressionStatement
             (
-                SyntaxFactory.InvocationExpression(memberAccess, SyntaxFactory.ArgumentList(argumentList))
+                SyntaxFactory.InvocationExpression(memberAccess, SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(argumentsList)))
             );
 
             return methodCall;
         }
 
-        private static IdentifierNameSyntax GetClassIdentifier()
+        private static List<ArgumentSyntax> Arguments(MethodDeclarationSyntax method)
         {
-            return SyntaxFactory.IdentifierName(SyntaxFactory.Identifier("this"));
+            var argumentsList = new List<ArgumentSyntax>();
+            foreach (var parameter in method.ParameterList.Parameters)
+            {
+                var expression = SyntaxFactory.ParseExpression(parameter.Identifier.Text);
+                var argument = SyntaxFactory.Argument(expression);
+                argumentsList.Add(argument);
+            }
+
+            return argumentsList;
         }
     }
 }
