@@ -64,15 +64,11 @@ namespace GenSharp.Refactorings
         {
             var argumentsList = Arguments(method);
 
-            var memberAccess = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.ThisExpression(),
-                SyntaxFactory.IdentifierName(method.Identifier)
-            );
+            var methodAccess = SyntaxFactory.ParseExpression(method.Identifier.ValueText);
 
             var methodCall = SyntaxFactory.ExpressionStatement
             (
-                SyntaxFactory.InvocationExpression(memberAccess, SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(argumentsList)))
+                SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(argumentsList)))
             );
 
             return methodCall.NormalizeWhitespace();
