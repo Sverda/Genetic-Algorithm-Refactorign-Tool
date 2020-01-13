@@ -10,9 +10,9 @@ namespace GenSharp.Refactorings
     {
         private readonly SemanticModel _semanticModel;
 
-        public List<ExtractedStatementModel> ExtractedStatements { get; private set; }
+        public List<ExtractedStatementModel> ExtractedStatements { get; }
 
-        public GenerateMethodFromStatementSyntaxWalker(SemanticModel semanticModel) : base(SyntaxWalkerDepth.Node)
+        public GenerateMethodFromStatementSyntaxWalker(SemanticModel semanticModel)
         {
             _semanticModel = semanticModel;
 
@@ -51,8 +51,8 @@ namespace GenSharp.Refactorings
             var identifiers = expression.DescendantTokens().Where(t => t.IsKind(SyntaxKind.IdentifierToken));
             foreach (var identifier in identifiers)
             {
-                var identifierType = _semanticModel.GetTypeInfo(identifier.Parent).Type;
-                var type = SyntaxFactory.ParseTypeName(identifierType.Name);
+                var symbol = _semanticModel.GetSymbolInfo(identifier.Parent);
+                var type = SyntaxFactory.ParseTypeName(symbol.Symbol.ToDisplayString());
                 var parameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier(identifier.ValueText)).WithType(type);
                 parameters.Add(parameter);
             }

@@ -28,8 +28,7 @@ class Calculations
             return basePrice * 0.98;
         }
     }
-}
-";
+}";
 
             GetSemanticModel(source, out var tree, out var model);
             var result = new ExtractDeclarationSyntaxRewriter(model)
@@ -55,8 +54,7 @@ class Calculations
     {
         return quantity * itemPrice;
     }
-}
-";
+}";
 
             Assert.AreEqual(expected, result.ToString());
         }
