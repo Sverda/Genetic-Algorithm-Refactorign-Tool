@@ -11,47 +11,52 @@ namespace GenSharp.Tests.Refactorings
         [TestMethod]
         public void ExtractDeclarationWithTwoParameters()
         {
-            const string source = @"
-            class Calculations
-            {
-                double CalculateTotal(int quantity, int itemPrice)
-                {
-                    double basePrice = quantity * itemPrice;
+            const string source =
+@"
+class Calculations
+{
+    double CalculateTotal(int quantity, int itemPrice)
+    {
+        double basePrice = quantity * itemPrice;
 
-                    if (basePrice > 1000)
-                    {
-                        return basePrice * 0.95;
-                    }
-                    else
-                    {
-                        return basePrice * 0.98;
-                    }
-                }
-            }";
+        if (basePrice > 1000)
+        {
+            return basePrice * 0.95;
+        }
+        else
+        {
+            return basePrice * 0.98;
+        }
+    }
+}
+";
 
             GetSemanticModel(source, out var tree, out var model);
-            var result = new ExtractDeclarationSyntaxRewriter(model).Visit(tree.GetRoot());
+            var result = new ExtractDeclarationSyntaxRewriter(model)
+                .Visit(tree.GetRoot())
+                .NormalizeWhitespace();
 
-            const string expected = @"
-            class Calculations
-            {
-                double CalculateTotal(int quantity, int itemPrice)
-                {
-                    if (basePrice(quantity, itemPrice) > 1000)
-                    {
-                        return basePrice(quantity, itemPrice) * 0.95;
-                    }
-                    else
-                    {
-                        return basePrice(quantity, itemPrice) * 0.98;
-                    }
-                }
+            const string expected =
+@"class Calculations
+{
+    double CalculateTotal(int quantity, int itemPrice)
+    {
+        if (basePrice(quantity, itemPrice) > 1000)
+        {
+            return basePrice(quantity, itemPrice) * 0.95;
+        }
+        else
+        {
+            return basePrice(quantity, itemPrice) * 0.98;
+        }
+    }
 
-                double basePrice(int quantity, int itemPrice)
-                {
-                    return quantity * itemPrice;
-                }
-            }";
+    double basePrice(int quantity, int itemPrice)
+    {
+        return quantity * itemPrice;
+    }
+}
+";
 
             Assert.AreEqual(expected, result.ToString());
         }

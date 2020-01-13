@@ -39,9 +39,7 @@ namespace GenSharp.Refactorings
 
             var methodRoot = SyntaxFactory.MethodDeclaration(node.Type, methodName)
                 .WithBody(SyntaxFactory.Block(SyntaxFactory.ReturnStatement(returnExpression)))
-                .AddParameterListParameters(parameters.ToArray())
-                .NormalizeWhitespace()
-                .WithLeadingTrivia();
+                .AddParameterListParameters(parameters.ToArray());
 
             return methodRoot;
         }
@@ -77,7 +75,7 @@ namespace GenSharp.Refactorings
                 SyntaxFactory.InvocationExpression(memberAccess, SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(argumentsList)))
             );
 
-            return methodCall;
+            return methodCall.NormalizeWhitespace();
         }
 
         private static List<ArgumentSyntax> Arguments(MethodDeclarationSyntax method)
