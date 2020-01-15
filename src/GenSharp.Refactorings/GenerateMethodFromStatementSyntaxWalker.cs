@@ -21,6 +21,13 @@ namespace GenSharp.Refactorings
 
         public override void VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
+            var afterEqualitySign = node.ChildNodes().OfType<VariableDeclaratorSyntax>().Single().Initializer.Value;
+            if (afterEqualitySign is LiteralExpressionSyntax)
+            {
+                base.VisitVariableDeclaration(node);
+                return;
+            }
+
             var model = new ExtractedStatementModel();
             model.TargetStatement = node;
             model.Method = MethodWithParameters(node);
@@ -33,12 +40,15 @@ namespace GenSharp.Refactorings
         //TODO: Move it to other class
         private MethodDeclarationSyntax MethodWithParameters(VariableDeclarationSyntax node)
         {
-            var methodName = node.Variables.Where(v => !string.IsNullOrEmpty(v.Identifier.Text)).Select(v => v.Identifier.Text).Single();
-            var returnExpression = node.DescendantNodes().OfType<BinaryExpressionSyntax>().Cast<ExpressionSyntax>().Single();
-            var parameters = Parameters(returnExpression);
+            var name = node.Variables
+                .Where(v => !string.IsNullOrEmpty(v.Identifier.Text))
+                .Select(v => v.Identifier.Text)
+                .Single();
+            var body = node.ChildNodes().OfType<VariableDeclaratorSyntax>().Single().Initializer.Value;
+            var parameters = Parameters(body);
 
-            var methodRoot = SyntaxFactory.MethodDeclaration(node.Type, methodName)
-                .WithBody(SyntaxFactory.Block(SyntaxFactory.ReturnStatement(returnExpression)))
+            var methodRoot = SyntaxFactory.MethodDeclaration(node.Type, name)
+                .WithBody(SyntaxFactory.Block(SyntaxFactory.ReturnStatement(body)))
                 .AddParameterListParameters(parameters.ToArray());
 
             return methodRoot;

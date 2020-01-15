@@ -147,7 +147,6 @@ class Calculations
     {
         int quantity = 1;
         int itemPrice = 2;
-
         if (basePrice(quantity, itemPrice) > 1000)
         {
             return basePrice(quantity, itemPrice) * 0.95;
