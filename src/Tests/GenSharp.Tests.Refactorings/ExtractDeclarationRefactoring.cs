@@ -175,7 +175,6 @@ class Calculations
 {
     int _quantity = 1;
     int _itemPrice = 2;
-
     double CalculateTotal()
     {
         double basePrice = _quantity * _itemPrice;
@@ -201,7 +200,6 @@ class Calculations
 {
     int _quantity = 1;
     int _itemPrice = 2;
-
     double CalculateTotal()
     {
         if (basePrice() > 1000)
@@ -231,7 +229,6 @@ class Calculations
 class Calculations
 {
     int _quantity = 1;
-
     double CalculateTotal()
     {
         int itemPrice = 2;
@@ -258,11 +255,9 @@ class Calculations
                 @"class Calculations
 {
     int _quantity = 1;
-
     double CalculateTotal()
     {
         int itemPrice = 2;
-
         if (basePrice(itemPrice) > 1000)
         {
             return basePrice(itemPrice) * 0.95;

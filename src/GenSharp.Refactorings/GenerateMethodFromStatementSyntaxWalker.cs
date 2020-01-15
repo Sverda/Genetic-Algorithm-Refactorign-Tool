@@ -30,7 +30,7 @@ namespace GenSharp.Refactorings
 
             var model = new ExtractedStatementModel();
             model.TargetStatement = node;
-            model.Method = MethodWithParameters(node);
+            model.Method = Method(node);
             model.Call = Call(model.Method);
             ExtractedStatements.Add(model);
 
@@ -38,7 +38,7 @@ namespace GenSharp.Refactorings
         }
 
         //TODO: Move it to other class
-        private MethodDeclarationSyntax MethodWithParameters(VariableDeclarationSyntax node)
+        private MethodDeclarationSyntax Method(VariableDeclarationSyntax node)
         {
             var name = node.Variables
                 .Where(v => !string.IsNullOrEmpty(v.Identifier.Text))
@@ -61,6 +61,14 @@ namespace GenSharp.Refactorings
             var identifiers = expression.DescendantTokens().Where(t => t.IsKind(SyntaxKind.IdentifierToken));
             foreach (var identifier in identifiers)
             {
+                var containingClass = identifier.Parent.AncestorsAndSelf().OfType<ClassDeclarationSyntax>().Single();
+                var isField = containingClass.Members.OfType<FieldDeclarationSyntax>()
+                    .Any(field => field.Declaration.Variables.Any(variable => variable.Identifier.ValueText.Equals(identifier.ValueText)));
+                if (isField)
+                {
+                    continue;
+                }
+
                 var typeSymbol = _semanticModel.GetTypeInfo(identifier.Parent).Type;
                 var typeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString());
                 var parameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier(identifier.ValueText)).WithType(typeSyntax);
@@ -70,7 +78,7 @@ namespace GenSharp.Refactorings
             return parameters;
         }
 
-        private ExpressionStatementSyntax Call(MethodDeclarationSyntax method)
+        private static ExpressionStatementSyntax Call(MethodDeclarationSyntax method)
         {
             var argumentsList = Arguments(method);
 
@@ -84,7 +92,7 @@ namespace GenSharp.Refactorings
             return methodCall.NormalizeWhitespace();
         }
 
-        private static List<ArgumentSyntax> Arguments(MethodDeclarationSyntax method)
+        private static IEnumerable<ArgumentSyntax> Arguments(MethodDeclarationSyntax method)
         {
             var argumentsList = new List<ArgumentSyntax>();
             foreach (var parameter in method.ParameterList.Parameters)
