@@ -61,9 +61,9 @@ namespace GenSharp.Refactorings
             var identifiers = expression.DescendantTokens().Where(t => t.IsKind(SyntaxKind.IdentifierToken));
             foreach (var identifier in identifiers)
             {
-                var symbol = _semanticModel.GetSymbolInfo(identifier.Parent);
-                var type = SyntaxFactory.ParseTypeName(symbol.Symbol.ToDisplayString());
-                var parameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier(identifier.ValueText)).WithType(type);
+                var typeSymbol = _semanticModel.GetTypeInfo(identifier.Parent).Type;
+                var typeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString());
+                var parameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier(identifier.ValueText)).WithType(typeSyntax);
                 parameters.Add(parameter);
             }
 
