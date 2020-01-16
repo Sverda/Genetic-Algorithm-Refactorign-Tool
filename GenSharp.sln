@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{27B9E6C1
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenSharp.Tests.Refactorings", "src\Tests\GenSharp.Tests.Refactorings\GenSharp.Tests.Refactorings.csproj", "{0FDB51DF-91E0-4AE8-AE79-FD133A0DABAB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenSharp.Genetics", "src\GenSharp.Genetics\GenSharp.Genetics.csproj", "{4AA66F36-7C0F-4B86-B5D3-1DE02A8100E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{0FDB51DF-91E0-4AE8-AE79-FD133A0DABAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FDB51DF-91E0-4AE8-AE79-FD133A0DABAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FDB51DF-91E0-4AE8-AE79-FD133A0DABAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AA66F36-7C0F-4B86-B5D3-1DE02A8100E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AA66F36-7C0F-4B86-B5D3-1DE02A8100E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AA66F36-7C0F-4B86-B5D3-1DE02A8100E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AA66F36-7C0F-4B86-B5D3-1DE02A8100E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
