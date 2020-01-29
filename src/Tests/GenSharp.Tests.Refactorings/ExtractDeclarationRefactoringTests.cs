@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenSharp.Tests.Refactorings
 {
     [TestClass]
-    public class ExtractDeclarationRefactoring
+    public class ExtractDeclarationRefactoringTests
     {
         [TestMethod]
         public void ExtractedMethodHas_SameTypesArguments()
