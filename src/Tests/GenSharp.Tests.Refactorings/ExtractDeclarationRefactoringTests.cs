@@ -276,5 +276,66 @@ class Calculations
 
             Assert.AreEqual(expected, result.ToString());
         }
+
+        [TestMethod]
+        public void ExtractedMethodHas_SingleScope()
+        {
+            const string source =
+                @"
+class Calculations
+{
+    double CalculateTotal()
+    {
+        int quantity = 1;
+        int itemPrice = 2;
+        double basePrice = quantity * itemPrice;
+
+        double basePrice2 = quantity * itemPrice * 2;
+
+        if (basePrice > 1000)
+        {
+            return basePrice;
+        }
+        else
+        {
+            return basePrice2;
+        }
+    }
+}";
+
+            source.GetSemanticModel(out var tree, out var model);
+            var result = new ExtractDeclarationSyntaxRewriter(model)
+                .Visit(tree.GetRoot())
+                .NormalizeWhitespace();
+
+            const string expected =
+                @"
+class Calculations
+{
+    double CalculateTotal()
+    {
+        int quantity = 1;
+        int itemPrice = 2;
+
+        double basePrice2 = quantity * itemPrice * 2;
+
+        if (basePrice > 1000)
+        {
+            return basePrice(quantity, itemPrice);
+        }
+        else
+        {
+            return basePrice2;
+        }
+    }
+
+    double basePrice(int quantity, int itemPrice)
+    {
+        return quantity * itemPrice;
+    }
+}";
+
+            Assert.AreEqual(expected, result.ToString());
+        }
     }
 }
