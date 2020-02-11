@@ -32,9 +32,14 @@ namespace GenSharp.Refactorings.Analyzers
                     return;
                 }
 
-                var diagnostic = Diagnostic.Create(_rule, actionContext.Node.GetLocation(), declaration.Variables.First().Initializer.Value);
-                actionContext.ReportDiagnostic(diagnostic);
-            }, SyntaxKind.LocalDeclarationStatement);
+                foreach (var variable in declaration.Variables)
+                {
+                    var variableName = variable.Identifier.ValueText;
+                    var diagnostic = Diagnostic.Create(_rule, actionContext.Node.GetLocation(), variableName);
+                    actionContext.ReportDiagnostic(diagnostic);
+                }
+            },
+            SyntaxKind.LocalDeclarationStatement);
         }
     }
 }
