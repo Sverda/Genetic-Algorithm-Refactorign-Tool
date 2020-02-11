@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace GenSharp.Refactorings
 {
-    class GenerateMethodFromStatementSyntaxWalker : CSharpSyntaxWalker
+    internal class GenerateMethodFromStatementSyntaxWalker : CSharpSyntaxWalker
     {
         private readonly SemanticModel _semanticModel;
 
@@ -28,9 +28,11 @@ namespace GenSharp.Refactorings
                 return;
             }
 
-            var model = new ExtractedStatementModel();
-            model.TargetStatement = node;
-            model.Method = Method(node);
+            var model = new ExtractedStatementModel
+            {
+                TargetStatement = node,
+                Method = Method(node)
+            };
             model.Call = Call(model.Method);
             ExtractedStatements.Add(model);
 
