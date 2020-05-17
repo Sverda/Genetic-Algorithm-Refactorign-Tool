@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GenSharp.Refactorings
+namespace GenSharp.Refactorings.Analyzers.Helpers
 {
     internal class GenerateMethodFromStatementSyntaxWalker : CSharpSyntaxWalker
     {

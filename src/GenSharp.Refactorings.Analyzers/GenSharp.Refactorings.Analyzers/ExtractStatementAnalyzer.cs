@@ -8,7 +8,7 @@ using System.Linq;
 namespace GenSharp.Refactorings.Analyzers
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class GenSharpRefactoringsAnalyzersAnalyzer : DiagnosticAnalyzer
+    public class ExtractStatementAnalyzer : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "GenSharp";
 

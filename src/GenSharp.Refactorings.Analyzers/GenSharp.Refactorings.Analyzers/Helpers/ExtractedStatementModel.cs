@@ -1,9 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace GenSharp.Refactorings
+namespace GenSharp.Refactorings.Analyzers.Helpers
 {
-    class ExtractedStatementModel
+    internal class ExtractedStatementModel
     {
         public SyntaxNode TargetStatement { get; set; }
 
