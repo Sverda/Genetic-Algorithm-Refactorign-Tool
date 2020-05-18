@@ -1,7 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Simplification;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -75,10 +74,11 @@ namespace TestHelper
         /// <returns>A string containing the syntax of the Document after formatting</returns>
         private static string GetStringFromDocument(Document document)
         {
-            var simplifiedDoc = Simplifier.ReduceAsync(document, Simplifier.Annotation).Result;
-            var root = simplifiedDoc.GetSyntaxRootAsync().Result;
-            root = Formatter.Format(root, Formatter.Annotation, simplifiedDoc.Project.Solution.Workspace);
-            return root.GetText().ToString();
+            document = Formatter.FormatAsync(document).Result;
+            //document = Simplifier.ReduceAsync(document, Simplifier.Annotation).Result;
+            var root = document.GetSyntaxRootAsync().Result;
+            //root = Formatter.Format(root, Formatter.Annotation, document.Project.Solution.Workspace);
+            return root.ToFullString();
         }
     }
 }
