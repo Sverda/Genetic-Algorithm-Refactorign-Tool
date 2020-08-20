@@ -10,16 +10,9 @@ namespace GenSharp.Refactorings.Analyzers
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class ExtractStatementAnalyzer : DiagnosticAnalyzer
     {
-        public const string DiagnosticId = "GenSharp";
+        public const string DiagnosticId = DiagnosticIdentifiers.ExtractStatement;
 
-        private static readonly LocalizableString _title = new LocalizableResourceString(nameof(Resources.AnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-        private static readonly LocalizableString _messageFormat = new LocalizableResourceString(nameof(Resources.AnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-        private static readonly LocalizableString _description = new LocalizableResourceString(nameof(Resources.AnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-        private const string _category = "Extract";
-
-        private static readonly DiagnosticDescriptor _rule = new DiagnosticDescriptor(DiagnosticId, _title, _messageFormat, _category, DiagnosticSeverity.Info, true, _description);
-
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(_rule);
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ExtractStatement);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -34,9 +27,7 @@ namespace GenSharp.Refactorings.Analyzers
 
                 foreach (var variable in declaration.Variables)
                 {
-                    var variableName = variable.Identifier.ValueText;
-                    var diagnostic = Diagnostic.Create(_rule, actionContext.Node.GetLocation(), variableName);
-                    actionContext.ReportDiagnostic(diagnostic);
+                    actionContext.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.ExtractStatement, variable.Identifier.GetLocation()));
                 }
             },
             SyntaxKind.LocalDeclarationStatement);

@@ -41,12 +41,12 @@ namespace ConsoleApplication1
 }";
             var expected = new DiagnosticResult
             {
-                Id = "GenSharp",
-                Message = "Variable declaration with name basePrice can be extracted",
+                Id = DiagnosticIdentifiers.ExtractStatement,
+                Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
                 Severity = DiagnosticSeverity.Info,
                 Locations = new[]
                 {
-                    new DiagnosticResultLocation("Test0.cs", 15, 13)
+                    new DiagnosticResultLocation("Test0.cs", 15, 20)
                 }
             };
 
@@ -116,12 +116,12 @@ namespace ConsoleApplication1
 }";
             var expected = new DiagnosticResult
             {
-                Id = "GenSharp",
-                Message = "Variable declaration with name basePrice can be extracted",
+                Id = DiagnosticIdentifiers.ExtractStatement,
+                Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
                 Severity = DiagnosticSeverity.Info,
                 Locations = new[]
                 {
-                    new DiagnosticResultLocation("Test0.cs", 15, 13)
+                    new DiagnosticResultLocation("Test0.cs", 15, 20)
                 }
             };
 
@@ -194,12 +194,12 @@ namespace ConsoleApplication1
 }";
             var expected = new DiagnosticResult
             {
-                Id = "GenSharp",
-                Message = "Variable declaration with name basePrice can be extracted",
+                Id = DiagnosticIdentifiers.ExtractStatement,
+                Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
                 Severity = DiagnosticSeverity.Info,
                 Locations = new[]
                 {
-                    new DiagnosticResultLocation("Test0.cs", 18, 13)
+                    new DiagnosticResultLocation("Test0.cs", 18, 20)
                 }
             };
 
@@ -274,12 +274,12 @@ namespace ConsoleApplication1
 }";
             var expected = new DiagnosticResult
             {
-                Id = "GenSharp",
-                Message = "Variable declaration with name basePrice can be extracted",
+                Id = DiagnosticIdentifiers.ExtractStatement,
+                Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
                 Severity = DiagnosticSeverity.Info,
                 Locations = new[]
                 {
-                    new DiagnosticResultLocation("Test0.cs", 17, 13)
+                    new DiagnosticResultLocation("Test0.cs", 17, 20)
                 }
             };
 
@@ -354,12 +354,12 @@ namespace ConsoleApplication1
 }";
             var expected = new DiagnosticResult
             {
-                Id = "GenSharp",
-                Message = "Variable declaration with name basePrice can be extracted",
+                Id = DiagnosticIdentifiers.ExtractStatement,
+                Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
                 Severity = DiagnosticSeverity.Info,
                 Locations = new[]
                 {
-                    new DiagnosticResultLocation("Test0.cs", 18, 13)
+                    new DiagnosticResultLocation("Test0.cs", 18, 20)
                 }
             };
 
