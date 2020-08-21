@@ -18,11 +18,7 @@ namespace GenSharp.Refactorings.Analyzers.Analyzers
         {
             context.RegisterSyntaxNodeAction(actionContext =>
                 {
-                    var declarations = actionContext.Node.DescendantNodes().OfType<MethodDeclarationSyntax>();
-                    foreach (var method in declarations)
-                    {
-                        actionContext.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.ExtractMethod, method.Identifier.GetLocation()));
-                    }
+                    actionContext.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.ExtractMethod, actionContext.Node.GetLocation()));
                 },
                 SyntaxKind.MethodDeclaration);
         }

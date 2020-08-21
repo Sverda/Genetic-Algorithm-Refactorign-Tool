@@ -45,7 +45,7 @@ namespace ConsoleApplication1
             {
                 Id = DiagnosticIdentifiers.ExtractStatement,
                 Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
-                Severity = DiagnosticSeverity.Info,
+                Severity = DiagnosticSeverity.Hidden,
                 Locations = new[]
                 {
                     new DiagnosticResultLocation("Test0.cs", 15, 20)
@@ -120,7 +120,7 @@ namespace ConsoleApplication1
             {
                 Id = DiagnosticIdentifiers.ExtractStatement,
                 Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
-                Severity = DiagnosticSeverity.Info,
+                Severity = DiagnosticSeverity.Hidden,
                 Locations = new[]
                 {
                     new DiagnosticResultLocation("Test0.cs", 15, 20)
@@ -198,7 +198,7 @@ namespace ConsoleApplication1
             {
                 Id = DiagnosticIdentifiers.ExtractStatement,
                 Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
-                Severity = DiagnosticSeverity.Info,
+                Severity = DiagnosticSeverity.Hidden,
                 Locations = new[]
                 {
                     new DiagnosticResultLocation("Test0.cs", 18, 20)
@@ -278,7 +278,7 @@ namespace ConsoleApplication1
             {
                 Id = DiagnosticIdentifiers.ExtractStatement,
                 Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
-                Severity = DiagnosticSeverity.Info,
+                Severity = DiagnosticSeverity.Hidden,
                 Locations = new[]
                 {
                     new DiagnosticResultLocation("Test0.cs", 17, 20)
@@ -358,7 +358,7 @@ namespace ConsoleApplication1
             {
                 Id = DiagnosticIdentifiers.ExtractStatement,
                 Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
-                Severity = DiagnosticSeverity.Info,
+                Severity = DiagnosticSeverity.Hidden,
                 Locations = new[]
                 {
                     new DiagnosticResultLocation("Test0.cs", 18, 20)
