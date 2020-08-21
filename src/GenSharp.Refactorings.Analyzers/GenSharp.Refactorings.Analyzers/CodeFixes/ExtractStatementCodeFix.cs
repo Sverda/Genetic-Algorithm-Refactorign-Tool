@@ -1,24 +1,24 @@
-using GenSharp.Refactorings.Analyzers.Helpers;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GenSharp.Refactorings.Analyzers.Analyzers;
+using GenSharp.Refactorings.Analyzers.Helpers;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace GenSharp.Refactorings.Analyzers
+namespace GenSharp.Refactorings.Analyzers.CodeFixes
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(GenSharpCodeFixProvider)), Shared]
-    public class GenSharpCodeFixProvider : CodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ExtractStatementCodeFix)), Shared]
+    public class ExtractStatementCodeFix : CodeFixProvider
     {
         private ClassDeclarationSyntax _currentClassNode;
         private GenerateMethodFromStatementSyntaxWalker _methodGenerator;
-        private const string _title = "Extract declaration";
 
         public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(ExtractStatementAnalyzer.DiagnosticId);
 
@@ -36,7 +36,7 @@ namespace GenSharp.Refactorings.Analyzers
 
             var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<VariableDeclarationSyntax>().First();
 
-            var codeAction = CodeAction.Create(_title, c => ExtractVariableDeclarationAsync(context.Document, declaration, c));
+            var codeAction = CodeAction.Create(DiagnosticDescriptors.ExtractStatement.Title.ToString(), c => ExtractVariableDeclarationAsync(context.Document, declaration, c));
             context.RegisterCodeFix(codeAction, diagnostic);
         }
 
@@ -53,7 +53,7 @@ namespace GenSharp.Refactorings.Analyzers
             InsertExtractedMethods();
             ReplaceVariableCallsWithMethodCalls();
 
-            var rootWithNewClass = document.GetSyntaxTreeAsync().Result.GetRoot().ReplaceNode(oldClassNode, _currentClassNode);
+            var rootWithNewClass = document.GetSyntaxTreeAsync(cancellationToken).Result.GetRoot().ReplaceNode(oldClassNode, _currentClassNode);
             return document.WithSyntaxRoot(rootWithNewClass);
         }
 

@@ -1,3 +1,5 @@
+using GenSharp.Refactorings.Analyzers.Analyzers;
+using GenSharp.Refactorings.Analyzers.CodeFixes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -402,7 +404,7 @@ namespace ConsoleApplication1
 
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
-            return new GenSharpCodeFixProvider();
+            return new ExtractStatementCodeFix();
         }
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()

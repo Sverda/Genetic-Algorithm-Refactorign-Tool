@@ -1,4 +1,5 @@
-﻿using GenSharp.Refactorings.Analyzers.Helpers.Diagnostics;
+﻿using GenSharp.Refactorings.Analyzers.Analyzers;
+using GenSharp.Refactorings.Analyzers.Helpers.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
