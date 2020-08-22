@@ -44,27 +44,27 @@ namespace TestHelper
         /// <param name="allowNewCompilerDiagnostics">A bool controlling whether or not the test will fail if the CodeFix introduces other warnings after being applied</param>
         protected void VerifyCSharpFix(string oldSource, string[] newSources, int? codeFixIndex = null, bool allowNewCompilerDiagnostics = false)
         {
-            var passed = false;
-            Exception exception = null;
+            var exceptions = new List<Exception>();
             foreach (var newSource in newSources)
             {
                 try
                 {
                     VerifyCSharpFix(oldSource, newSource, codeFixIndex, allowNewCompilerDiagnostics);
-                    passed = true;
                 }
-                catch (AssertFailedException e)
+                catch (AssertFailedException exception)
                 {
-                    exception = e;
+                    exceptions.Add(exception);
                 }
             }
 
+            var passed = exceptions.Count < newSources.Length;
             if (passed)
             {
+                TestContext.WriteLine(new AggregateException(exceptions).Message);
                 return;
             }
 
-            throw exception;
+            throw new AggregateException(exceptions);
         }
 
         /// <summary>

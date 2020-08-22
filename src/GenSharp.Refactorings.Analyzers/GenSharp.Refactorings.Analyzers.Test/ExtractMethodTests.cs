@@ -156,6 +156,95 @@ class Program
 
             VerifyCSharpFix(test, fixtests, null, true);
         }
+        
+        [TestMethod]
+        public void ExtractMethod3()
+        {
+            const string test = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+class Program
+{
+    void Test(string[] args)
+    {
+        int i = 10;
+        int i2 = i;
+    }
+}";
+            var expected = new DiagnosticResult
+            {
+                Id = DiagnosticIdentifiers.ExtractMethod,
+                Message = DiagnosticDescriptors.ExtractMethod.MessageFormat.ToString(),
+                Severity = DiagnosticSeverity.Hidden,
+                Locations = new[]
+                {
+                    new DiagnosticResultLocation("Test0.cs", 7, 5)
+                }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+
+            var fixtests = new[]
+            {
+                @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+class Program
+{
+    void Test(string[] args)
+    {
+        Test_ExtractedMethod();
+    }
+
+    private void Test_ExtractedMethod()
+    {
+        int i = 10;
+        int i2 = i;
+    }
+}",
+
+                @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+class Program
+{
+    void Test(string[] args)
+    {
+        int i = 10;
+        Test_ExtractedMethod(i);
+    }
+
+    private void Test_ExtractedMethod(int i)
+    {
+        int i2 = i;
+    }
+}",
+
+                @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+class Program
+{
+    void Test(string[] args)
+    {
+        int i = Test_ExtractedMethod();
+        int i2 = i;
+    }
+
+    private int Test_ExtractedMethod()
+    {
+        int i = 10;
+        return i;
+    }
+}"
+            };
+
+            VerifyCSharpFix(test, fixtests, null, true);
+        }
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
         {
