@@ -329,12 +329,9 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
                 var parameters = MarkVariableInfoToUseAsReturnValueIfPossible(GetMethodParameters(variableInfoMap.Values));
                 var variableToUseAsReturnValue = parameters.FirstOrDefault(v => v.UseAsReturnValue);
 
-                // TODO: Handle types other than 'void'
-                //var returnType = variableToUseAsReturnValue != null
-                //    ? variableToUseAsReturnValue.GetVariableType(_semanticDocument)
-                //    : compilation.GetSpecialType(SpecialType.System_Void);
-
-                var returnType = compilation.GetSpecialType(SpecialType.System_Void);
+                var returnType = variableToUseAsReturnValue != null
+                    ? variableToUseAsReturnValue.Type
+                    : compilation.GetSpecialType(SpecialType.System_Void);
 
                 return (parameters, returnType, variableToUseAsReturnValue);
             }

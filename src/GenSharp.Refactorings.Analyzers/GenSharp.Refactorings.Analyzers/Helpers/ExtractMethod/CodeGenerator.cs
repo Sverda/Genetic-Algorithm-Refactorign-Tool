@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
@@ -23,11 +22,15 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             var body = selectionResult.AsBody();
             body = AppendReturnStatementIfNeeded(body);
 
+            var displayName = _analyzerResult.ReturnType.ToMinimalDisplayString(_semanticDocument.SemanticModel, 0);
+            var returnType = SyntaxFactory.ParseTypeName(displayName);
+
             var extractedMethod = SyntaxFactory
-                .MethodDeclaration(SyntaxFactory.ParseTypeName("void"), $"{extractFrom.Identifier.Text}_ExtractedMethod")
+                .MethodDeclaration(returnType,
+                    $"{extractFrom.Identifier.Text}_ExtractedMethod")
                 .AddParameterListParameters(CreateMethodParameters(_analyzerResult).ToArray())
-                .WithBody(body)
-                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
+                .WithBody(body);
             return extractedMethod;
         }
 
@@ -40,7 +43,7 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
             var statements = body.Statements;
             var returnStatement = CreateReturnStatement(_analyzerResult.VariableToUseAsReturnValue.Name);
-            var statementSyntaxes = statements.Concat(new []{ returnStatement });
+            var statementSyntaxes = statements.Concat(new[] { returnStatement });
             return SyntaxFactory.Block(statementSyntaxes);
         }
 

@@ -334,7 +334,7 @@ class Program
         i2 = Test_ExtractedMethod(i);
     }
 
-    private static int Test_ExtractedMethod(int i)
+    private int Test_ExtractedMethod(int i)
     {
         return i;
     }
