@@ -46,8 +46,8 @@ namespace GenSharp.Refactorings.Analyzers.CodeFixes
             var analyzer = new MethodExtractorAnalyzer(semanticDocument, selectionResult, cancellationToken);
             var result = analyzer.Analyze();
 
-            var codeGenerator = new CodeGenerator(semanticDocument, result);
-            var extractedMethod = codeGenerator.ConstructMethodDeclaration(extractFrom, selectionResult);
+            var codeGenerator = new CodeGenerator(semanticDocument, result, selectionResult);
+            var extractedMethod = codeGenerator.GenerateMethodDefinition(extractFrom, cancellationToken);
             InsertMethod(extractFrom, editor, extractedMethod);
             ReplaceStatementsWithOneNode(codeGenerator, extractedMethod, editor, selectionResult);
 

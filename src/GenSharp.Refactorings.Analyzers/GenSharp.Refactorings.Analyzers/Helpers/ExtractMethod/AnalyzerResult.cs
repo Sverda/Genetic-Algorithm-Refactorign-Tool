@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 
 namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 {
@@ -55,5 +56,12 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
         public bool HasReturnType => ReturnType.SpecialType != SpecialType.System_Void && !AwaitTaskReturn;
 
         public IEnumerable<VariableInfo> MethodParameters => _variables.Where(v => v.UseAsParameter);
+
+        public IEnumerable<VariableInfo> GetVariablesToSplitOrMoveIntoMethodDefinition(CancellationToken cancellationToken)
+        {
+            return _variables
+                .Where(v => v.GetDeclarationBehavior(cancellationToken) == DeclarationBehavior.SplitIn ||
+                            v.GetDeclarationBehavior(cancellationToken) == DeclarationBehavior.MoveIn);
+        }
     }
 }

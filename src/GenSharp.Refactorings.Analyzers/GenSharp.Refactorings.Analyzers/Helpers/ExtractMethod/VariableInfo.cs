@@ -57,5 +57,20 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
         private static int Compare(VariableInfo left, VariableInfo right, INamedTypeSymbol cancellationTokenType)
             => VariableSymbol.Compare(left._variableSymbol, right._variableSymbol, cancellationTokenType);
+
+        public DeclarationBehavior GetDeclarationBehavior(CancellationToken cancellationToken)
+        {
+            if (_useAsReturnValue)
+            {
+                return _variableStyle.ReturnStyle.DeclarationBehavior;
+            }
+
+            if (_variableSymbol.GetUseSaferDeclarationBehavior(cancellationToken))
+            {
+                return _variableStyle.ParameterStyle.SaferDeclarationBehavior;
+            }
+
+            return _variableStyle.ParameterStyle.DeclarationBehavior;
+        }
     }
 }
