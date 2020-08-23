@@ -2,6 +2,8 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 {
@@ -18,12 +20,35 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
         public MethodDeclarationSyntax ConstructMethodDeclaration(MethodDeclarationSyntax extractFrom, SelectionResult selectionResult)
         {
+            var body = selectionResult.AsBody();
+            body = AppendReturnStatementIfNeeded(body);
+
             var extractedMethod = SyntaxFactory
                 .MethodDeclaration(SyntaxFactory.ParseTypeName("void"), $"{extractFrom.Identifier.Text}_ExtractedMethod")
                 .AddParameterListParameters(CreateMethodParameters(_analyzerResult).ToArray())
-                .WithBody(selectionResult.AsBody())
+                .WithBody(body)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
             return extractedMethod;
+        }
+
+        private BlockSyntax AppendReturnStatementIfNeeded(BlockSyntax body)
+        {
+            if (!_analyzerResult.HasVariableToUseAsReturnValue)
+            {
+                return body;
+            }
+
+            var statements = body.Statements;
+            var returnStatement = CreateReturnStatement(_analyzerResult.VariableToUseAsReturnValue.Name);
+            var statementSyntaxes = statements.Concat(new []{ returnStatement });
+            return SyntaxFactory.Block(statementSyntaxes);
+        }
+
+        private StatementSyntax CreateReturnStatement(string identifierName = null)
+        {
+            return string.IsNullOrEmpty(identifierName)
+                ? SyntaxFactory.ReturnStatement()
+                : SyntaxFactory.ReturnStatement(SyntaxFactory.IdentifierName(identifierName));
         }
 
         private static List<ParameterSyntax> CreateMethodParameters(AnalyzerResult analyzerResult)

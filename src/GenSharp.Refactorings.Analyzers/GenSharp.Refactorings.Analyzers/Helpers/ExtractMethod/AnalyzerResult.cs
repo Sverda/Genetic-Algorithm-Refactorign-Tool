@@ -48,10 +48,6 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
         public ITypeSymbol ReturnType { get; }
 
-        public ReadOnlyCollection<ITypeParameterSymbol> MethodTypeParametersInDeclaration => new ReadOnlyCollection<ITypeParameterSymbol>(_typeParametersInDeclaration);
-
-        public ReadOnlyCollection<ITypeParameterSymbol> MethodTypeParametersInConstraintList => new ReadOnlyCollection<ITypeParameterSymbol>(_typeParametersInConstraintList);
-
         public bool HasVariableToUseAsReturnValue => _variableToUseAsReturnValue != null;
 
         public VariableInfo VariableToUseAsReturnValue => _variableToUseAsReturnValue;
