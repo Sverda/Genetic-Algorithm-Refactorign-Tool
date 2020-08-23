@@ -46,9 +46,10 @@ namespace GenSharp.Refactorings.Analyzers.CodeFixes
             var analyzer = new MethodExtractorAnalyzer(semanticDocument, selectionResult, cancellationToken);
             var result = analyzer.Analyze();
 
-            var extractedMethod = CodeGenerator.ConstructMethodDeclaration(extractFrom, selectionResult, result);
+            var codeGenerator = new CodeGenerator(semanticDocument, result);
+            var extractedMethod = codeGenerator.ConstructMethodDeclaration(extractFrom, selectionResult);
             InsertMethod(extractFrom, editor, extractedMethod);
-            ReplaceStatementsWithOneNode(editor, extractedMethod, selectionResult, result);
+            ReplaceStatementsWithOneNode(codeGenerator, extractedMethod, editor, selectionResult);
 
             return editor.GetChangedDocument();
         }
@@ -59,9 +60,10 @@ namespace GenSharp.Refactorings.Analyzers.CodeFixes
             editor.AddMember(classNode, extractedMethod);
         }
 
-        private static void ReplaceStatementsWithOneNode(SyntaxEditor editor, MethodDeclarationSyntax extractedMethod, SelectionResult selectionResult, AnalyzerResult analyzerResult)
+        private static void ReplaceStatementsWithOneNode(CodeGenerator codeGenerator,
+            MethodDeclarationSyntax extractedMethod, SyntaxEditor editor, SelectionResult selectionResult)
         {
-            var methodCall = CodeGenerator.CreateCallSignature(extractedMethod, analyzerResult);
+            var methodCall = codeGenerator.CreateCallSignature(extractedMethod);
             editor.ReplaceRangeNodes(selectionResult, methodCall);
         }
     }

@@ -5,18 +5,27 @@ using System.Collections.Generic;
 
 namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 {
-    internal static class CodeGenerator
+    internal class CodeGenerator
     {
-        public static MethodDeclarationSyntax ConstructMethodDeclaration(MethodDeclarationSyntax extractFrom, SelectionResult selectionResult, AnalyzerResult analyzerResult)
+        private readonly SemanticDocument _semanticDocument;
+        private readonly AnalyzerResult _analyzerResult;
+
+        public CodeGenerator(SemanticDocument semanticDocument, AnalyzerResult analyzerResult)
+        {
+            _semanticDocument = semanticDocument;
+            _analyzerResult = analyzerResult;
+        }
+
+        public MethodDeclarationSyntax ConstructMethodDeclaration(MethodDeclarationSyntax extractFrom, SelectionResult selectionResult)
         {
             var extractedMethod = SyntaxFactory
                 .MethodDeclaration(SyntaxFactory.ParseTypeName("void"), $"{extractFrom.Identifier.Text}_ExtractedMethod")
-                .AddParameterListParameters(CreateMethodParameters(analyzerResult).ToArray())
+                .AddParameterListParameters(CreateMethodParameters(_analyzerResult).ToArray())
                 .WithBody(selectionResult.AsBody())
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
             return extractedMethod;
         }
-        
+
         private static List<ParameterSyntax> CreateMethodParameters(AnalyzerResult analyzerResult)
         {
             var parameters = new List<ParameterSyntax>();
@@ -33,12 +42,12 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             return parameters;
         }
 
-        public static ExpressionStatementSyntax CreateCallSignature(MethodDeclarationSyntax method, AnalyzerResult analyzerResult)
+        public ExpressionStatementSyntax CreateCallSignature(MethodDeclarationSyntax method)
         {
             var methodName = SyntaxFactory.ParseExpression(method.Identifier.ValueText);
 
             var arguments = new List<ArgumentSyntax>();
-            foreach (var argument in analyzerResult.MethodParameters)
+            foreach (var argument in _analyzerResult.MethodParameters)
             {
                 var modifier = GetParameterRefSyntaxKind(argument.ParameterModifier);
                 var refOrOut = modifier == SyntaxKind.None ? default : SyntaxFactory.Token(modifier);
