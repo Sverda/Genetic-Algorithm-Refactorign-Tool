@@ -12,17 +12,44 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
     {
         public static SelectionResult ExtractFrom(BaseMethodDeclarationSyntax method)
         {
-            var statements = FindExtractableCode(method);
-            return new SelectionResult(statements);
+            if (SelectionResultConfiguration.Get() is null)
+            {
+                var statements = FindRandomExtractableCode(method);
+                return new SelectionResult(statements);
+            }
+            else
+            {
+                var statements = FindWithConfigExtractableCode(method);
+                return new SelectionResult(statements);
+            }
         }
 
-        private static IEnumerable<StatementSyntax> FindExtractableCode(BaseMethodDeclarationSyntax extractFrom)
+        private static IEnumerable<StatementSyntax> FindRandomExtractableCode(BaseMethodDeclarationSyntax extractFrom)
         {
             var random = new Random();
-            var returnNodes = new List<StatementSyntax>();
             var statementsCount = extractFrom.Body.Statements.Count;
             var startingPosition = random.Next(0, statementsCount);
             var depth = random.Next(1,( statementsCount + 1) - startingPosition);
+
+            var returnNodes = new List<StatementSyntax>();
+            for (var i = startingPosition; i < startingPosition + depth; i++)
+            {
+                var node = extractFrom.Body.Statements[i];
+                if (node != null) 
+                {
+                    returnNodes.Add(node);
+                }
+            }
+
+            return returnNodes;
+        }
+
+        private static IEnumerable<StatementSyntax> FindWithConfigExtractableCode(BaseMethodDeclarationSyntax extractFrom)
+        {
+            var startingPosition = SelectionResultConfiguration.Get().LineStart;
+            var depth = SelectionResultConfiguration.Get().Depth;
+
+            var returnNodes = new List<StatementSyntax>();
             for (var i = startingPosition; i < startingPosition + depth; i++)
             {
                 var node = extractFrom.Body.Statements[i];
@@ -96,7 +123,7 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             {
                 case AccessorDeclarationSyntax access:
                     // property or event case
-                    if (access.Parent == null || access.Parent.Parent == null)
+                    if (access.Parent?.Parent == null)
                     {
                         return null;
                     }

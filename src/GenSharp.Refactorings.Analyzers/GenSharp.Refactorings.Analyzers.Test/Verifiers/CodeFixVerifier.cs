@@ -131,6 +131,11 @@ namespace TestHelper
             var passed = exceptions.Count < newSources.Length;
             if (!passed)
             {
+                if (exceptions.Count == 1)
+                {
+                    throw exceptions.First();
+                }
+
                 throw new AggregateException(exceptions);
             }
 
