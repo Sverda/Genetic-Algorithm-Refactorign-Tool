@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 
@@ -34,6 +35,12 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
             return new VariableInfo(variable._variableSymbol, variable._variableStyle, useAsReturnValue: true);
         }
+        
+        public void AddIdentifierTokenAnnotationPair(
+            List<Tuple<SyntaxToken, SyntaxAnnotation>> annotations, CancellationToken cancellationToken)
+        {
+            _variableSymbol.AddIdentifierTokenAnnotationPair(annotations, cancellationToken);
+        }
 
         public string Name => _variableSymbol.Name;
 
@@ -48,6 +55,8 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             (_useAsReturnValue && _variableStyle.ReturnStyle.ParameterBehavior != ParameterBehavior.None);
 
         public ParameterBehavior ParameterModifier => _useAsReturnValue ? _variableStyle.ReturnStyle.ParameterBehavior : _variableStyle.ParameterStyle.ParameterBehavior;
+
+        public ReturnBehavior ReturnBehavior => _useAsReturnValue ? _variableStyle.ReturnStyle.ReturnBehavior : ReturnBehavior.None;
 
         public static void SortVariables(Compilation compilation, List<VariableInfo> list)
         {

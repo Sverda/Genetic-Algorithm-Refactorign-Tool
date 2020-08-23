@@ -10,6 +10,7 @@ using System.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace GenSharp.Refactorings.Analyzers.CodeFixes
 {
@@ -38,33 +39,14 @@ namespace GenSharp.Refactorings.Analyzers.CodeFixes
 
         private static async Task<Document> ExtractMethodAsync(Document document, MethodDeclarationSyntax extractFrom, CancellationToken cancellationToken)
         {
-            var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
-
             var selectionResult = SelectionResult.ExtractFrom(extractFrom);
-
             var semanticDocument = await SemanticDocument.CreateAsync(document, cancellationToken);
             var analyzer = new MethodExtractorAnalyzer(semanticDocument, selectionResult, cancellationToken);
-            var result = analyzer.Analyze();
 
-            var codeGenerator = new CodeGenerator(semanticDocument, result, selectionResult);
-            var extractedMethod = codeGenerator.GenerateMethodDefinition(extractFrom, cancellationToken);
-            InsertMethod(extractFrom, editor, extractedMethod);
-            ReplaceStatementsWithOneNode(codeGenerator, extractedMethod, editor, selectionResult);
+            var codeGenerator = new CodeGenerator(semanticDocument, analyzer.Analyze(), selectionResult, $"{extractFrom.Identifier.Text}_ExtractedMethod");
+            semanticDocument = await codeGenerator.GenerateAsync(cancellationToken);
 
-            return editor.GetChangedDocument();
-        }
-
-        private static void InsertMethod(SyntaxNode extractFrom, SyntaxEditor editor, SyntaxNode extractedMethod)
-        {
-            var classNode = extractFrom.Ancestors(false).OfType<ClassDeclarationSyntax>().Single();
-            editor.AddMember(classNode, extractedMethod);
-        }
-
-        private static void ReplaceStatementsWithOneNode(CodeGenerator codeGenerator,
-            MethodDeclarationSyntax extractedMethod, SyntaxEditor editor, SelectionResult selectionResult)
-        {
-            var methodCall = codeGenerator.CreateCallSignature(extractedMethod);
-            editor.ReplaceRangeNodes(selectionResult, methodCall);
+            return semanticDocument.Document;
         }
     }
 }

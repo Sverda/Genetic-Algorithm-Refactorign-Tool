@@ -1,9 +1,11 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 {
@@ -12,15 +14,36 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
         private readonly SemanticDocument _semanticDocument;
         private readonly AnalyzerResult _analyzerResult;
         private readonly SelectionResult _selectionResult;
+        private readonly string _methodName;
 
-        public CodeGenerator(SemanticDocument semanticDocument, AnalyzerResult analyzerResult, SelectionResult selectionResult)
+        public CodeGenerator(SemanticDocument semanticDocument, AnalyzerResult analyzerResult, SelectionResult selectionResult, string methodName)
         {
             _semanticDocument = semanticDocument;
             _analyzerResult = analyzerResult;
             _selectionResult = selectionResult;
+            _methodName = methodName;
         }
 
-        public MethodDeclarationSyntax GenerateMethodDefinition(MethodDeclarationSyntax extractFrom, CancellationToken cancellationToken)
+        public async Task<SemanticDocument> GenerateAsync(CancellationToken cancellationToken)
+        {
+            // Call Site Method Replacement
+            var root = _semanticDocument.Root;
+            root = root.ReplaceNode(_selectionResult.GetContainingScope(), await GenerateBodyForCallSiteContainerAsync(cancellationToken).ConfigureAwait(false));
+            var callSiteDocument = await _semanticDocument.WithSyntaxRootAsync(root, cancellationToken).ConfigureAwait(false);
+
+            // New Method Insertion
+            root = callSiteDocument.Root;
+            var destination = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
+            var extractedMethod = GenerateMethodDefinition(cancellationToken);
+            var newDestination = destination.AddMembers(extractedMethod);
+            root = root.ReplaceNode(destination, newDestination);
+            var newMethodDocument =
+                await callSiteDocument.WithSyntaxRootAsync(root, cancellationToken).ConfigureAwait(false);
+
+            return newMethodDocument;
+        }
+
+        public MethodDeclarationSyntax GenerateMethodDefinition(CancellationToken cancellationToken)
         {
             var body = _selectionResult.AsBody();
             body = AppendReturnStatementIfNeeded(body);
@@ -30,8 +53,7 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             var returnType = SyntaxFactory.ParseTypeName(displayName);
 
             var extractedMethod = SyntaxFactory
-                .MethodDeclaration(returnType,
-                    $"{extractFrom.Identifier.Text}_ExtractedMethod")
+                .MethodDeclaration(returnType, _methodName)
                 .AddParameterListParameters(CreateMethodParameters().ToArray())
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
                 .WithBody(body);
@@ -64,13 +86,13 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             var postProcessor = new PostProcessor(_semanticDocument.SemanticModel, _selectionResult.FirstStatement().SpanStart);
 
             var variables = _analyzerResult.GetVariablesToSplitOrMoveIntoMethodDefinition(cancellationToken);
-            var declarationStatements = CreateDeclarationStatements(variables, cancellationToken);
+            var declarationStatements = CreateDeclarationStatements(variables);
             declarationStatements = postProcessor.MergeDeclarationStatements(declarationStatements);
 
             return SyntaxFactory.Block(declarationStatements.Concat(statements));
         }
 
-        private IEnumerable<StatementSyntax> CreateDeclarationStatements(IEnumerable<VariableInfo> variables, CancellationToken cancellationToken)
+        private IEnumerable<StatementSyntax> CreateDeclarationStatements(IEnumerable<VariableInfo> variables)
         {
             var list = new List<StatementSyntax>();
 
@@ -99,9 +121,7 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             return parameters;
         }
 
-        private StatementSyntax CreateDeclarationStatement(
-            VariableInfo variable,
-            ExpressionSyntax initialValue)
+        private StatementSyntax CreateDeclarationStatement(VariableInfo variable, ExpressionSyntax initialValue)
         {
             var typeNode =
                 SyntaxFactory.ParseTypeName(variable.Type.ToMinimalDisplayString(_semanticDocument.SemanticModel, 0));
@@ -115,10 +135,8 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
                             SyntaxFactory.Identifier(variable.Name)).WithInitializer(equalsValueClause)));
         }
 
-        public ExpressionStatementSyntax CreateCallSignature(MethodDeclarationSyntax method)
+        public InvocationExpressionSyntax CreateCallSignature()
         {
-            var methodName = SyntaxFactory.ParseExpression(method.Identifier.ValueText);
-
             var arguments = new List<ArgumentSyntax>();
             foreach (var argument in _analyzerResult.MethodParameters)
             {
@@ -129,18 +147,136 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             }
 
             var argumentListSyntax = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(arguments));
+            var methodName = SyntaxFactory.ParseExpression(_methodName);
             var invocation = SyntaxFactory.InvocationExpression(methodName, argumentListSyntax);
-
-            return SyntaxFactory
-                .ExpressionStatement(invocation)
-                .NormalizeWhitespace()
-                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+            return invocation;
         }
 
         private static SyntaxKind GetParameterRefSyntaxKind(ParameterBehavior parameterBehavior)
         {
             var parameterRefSyntaxKind = parameterBehavior == ParameterBehavior.Out ? SyntaxKind.OutKeyword : SyntaxKind.None;
             return parameterBehavior == ParameterBehavior.Ref ? SyntaxKind.RefKeyword : parameterRefSyntaxKind;
+        }
+
+        public async Task<SyntaxNode> GenerateBodyForCallSiteContainerAsync(CancellationToken cancellationToken)
+        {
+            var container = _selectionResult.GetContainingScope();
+            var variableMapToRemove = CreateVariableDeclarationToRemoveMap(
+                _analyzerResult.GetVariablesToMoveIntoMethodDefinition(cancellationToken), cancellationToken);
+            var firstStatementToRemove = _selectionResult.FirstStatement();
+            var lastStatementToRemove = _selectionResult.LastStatement();
+
+            var statementsToInsert = await CreateStatementsOrInitializerToInsertAtCallSiteAsync(cancellationToken).ConfigureAwait(false);
+
+            var callSiteGenerator =
+                new CallSiteContainerRewriter(
+                    container,
+                    variableMapToRemove,
+                    firstStatementToRemove,
+                    lastStatementToRemove,
+                    statementsToInsert);
+
+            return callSiteGenerator.Generate();
+        }
+
+        private static HashSet<SyntaxAnnotation> CreateVariableDeclarationToRemoveMap(IEnumerable<VariableInfo> variables, CancellationToken cancellationToken)
+        {
+            var annotations = new List<Tuple<SyntaxToken, SyntaxAnnotation>>();
+
+            foreach (var variable in variables)
+            {
+                variable.AddIdentifierTokenAnnotationPair(annotations, cancellationToken);
+            }
+
+            return new HashSet<SyntaxAnnotation>(annotations.Select(t => t.Item2));
+        }
+
+        private async Task<IEnumerable<SyntaxNode>> CreateStatementsOrInitializerToInsertAtCallSiteAsync(CancellationToken cancellationToken)
+        {
+            var semanticModel = _semanticDocument.SemanticModel;
+            var context = _selectionResult.FirstStatement();
+            var postProcessor = new PostProcessor(semanticModel, context.SpanStart);
+
+            var statements = AddSplitOrMoveDeclarationOutStatementsToCallSite(cancellationToken);
+            statements = postProcessor.MergeDeclarationStatements(statements);
+            statements = AddAssignmentStatementToCallSite(statements);
+            statements = AddInvocationAtCallSite(statements);
+
+            return statements;
+        }
+
+        private IEnumerable<StatementSyntax> AddSplitOrMoveDeclarationOutStatementsToCallSite(CancellationToken cancellationToken)
+        {
+            var list = new List<StatementSyntax>();
+
+            foreach (var variable in _analyzerResult.GetVariablesToSplitOrMoveOutToCallSite(cancellationToken))
+            {
+                if (variable.UseAsReturnValue)
+                {
+                    continue;
+                }
+
+                var declaration = CreateDeclarationStatement(variable, initialValue: null);
+                list.Add(declaration);
+            }
+
+            return list;
+        }
+
+        private IEnumerable<StatementSyntax> AddAssignmentStatementToCallSite(IEnumerable<StatementSyntax> statements)
+        {
+            if (!_analyzerResult.HasVariableToUseAsReturnValue)
+            {
+                return statements;
+            }
+
+            var returnVariable = _analyzerResult.VariableToUseAsReturnValue;
+            if (returnVariable.ReturnBehavior == ReturnBehavior.Initialization)
+            {
+                // there must be one decl behavior when there is "return value and initialize" variable
+                var declarationStatement = CreateDeclarationStatement(returnVariable, CreateCallSignature());
+                return statements.Concat(new[] { declarationStatement });
+            }
+
+            var identifier = SyntaxFactory.Identifier(returnVariable.Name);
+            var invocation = CreateCallSignature();
+            var assignment = CreateAssignmentExpressionStatement(identifier, invocation);
+            return statements.Concat(new[] { assignment });
+        }
+
+        private static StatementSyntax CreateAssignmentExpressionStatement(SyntaxToken identifier, ExpressionSyntax rvalue)
+            => SyntaxFactory.ExpressionStatement(CreateAssignmentExpression(identifier, rvalue));
+
+        private static ExpressionSyntax CreateAssignmentExpression(SyntaxToken identifier, ExpressionSyntax rvalue)
+        {
+            return SyntaxFactory.AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                SyntaxFactory.IdentifierName(identifier),
+                rvalue);
+        }
+
+        private IEnumerable<StatementSyntax> AddInvocationAtCallSite(IEnumerable<StatementSyntax> statements)
+        {
+            if (_analyzerResult.HasVariableToUseAsReturnValue)
+            {
+                return statements;
+            }
+
+            // add invocation expression
+            var statement = GetStatementContainingInvocationToExtractedMethodWorker();
+            return statements.Concat(new[] { statement });
+        }
+
+        private StatementSyntax GetStatementContainingInvocationToExtractedMethodWorker()
+        {
+            var callSignature = CreateCallSignature();
+
+            if (_analyzerResult.HasReturnType)
+            {
+                return SyntaxFactory.ReturnStatement(callSignature);
+            }
+
+            return SyntaxFactory.ExpressionStatement(callSignature);
         }
     }
 }

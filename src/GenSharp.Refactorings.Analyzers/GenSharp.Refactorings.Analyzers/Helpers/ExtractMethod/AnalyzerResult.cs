@@ -57,11 +57,20 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
         public IEnumerable<VariableInfo> MethodParameters => _variables.Where(v => v.UseAsParameter);
 
+        public IEnumerable<VariableInfo> GetVariablesToMoveIntoMethodDefinition(CancellationToken cancellationToken)
+            => _variables.Where(v => v.GetDeclarationBehavior(cancellationToken) == DeclarationBehavior.MoveIn);
+
         public IEnumerable<VariableInfo> GetVariablesToSplitOrMoveIntoMethodDefinition(CancellationToken cancellationToken)
         {
             return _variables
                 .Where(v => v.GetDeclarationBehavior(cancellationToken) == DeclarationBehavior.SplitIn ||
                             v.GetDeclarationBehavior(cancellationToken) == DeclarationBehavior.MoveIn);
+        }
+
+        public IEnumerable<VariableInfo> GetVariablesToSplitOrMoveOutToCallSite(CancellationToken cancellationToken)
+        {
+            return _variables.Where(v => v.GetDeclarationBehavior(cancellationToken) == DeclarationBehavior.SplitOut ||
+                                         v.GetDeclarationBehavior(cancellationToken) == DeclarationBehavior.MoveOut);
         }
     }
 }

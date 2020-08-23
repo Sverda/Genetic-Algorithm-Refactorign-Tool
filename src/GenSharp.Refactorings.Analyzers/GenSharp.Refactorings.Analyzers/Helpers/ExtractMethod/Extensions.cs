@@ -1,4 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 {
@@ -20,5 +24,11 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
             return methodSymbol.ReturnType;
         }
+
+        public static bool HasSyntaxAnnotation(this HashSet<SyntaxAnnotation> set, SyntaxNode node)
+            => set.Any(a => node.GetAnnotatedNodesAndTokens(a).Any());
+
+        public static Task<SemanticDocument> WithSyntaxRootAsync(this SemanticDocument semanticDocument, SyntaxNode root, CancellationToken cancellationToken)
+            => SemanticDocument.CreateAsync(semanticDocument.Document.WithSyntaxRoot(root), cancellationToken);
     }
 }

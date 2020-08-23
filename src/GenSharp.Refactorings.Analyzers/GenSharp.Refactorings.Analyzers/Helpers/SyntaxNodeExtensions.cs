@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 using System.Linq;
 
 namespace GenSharp.Refactorings.Analyzers.Helpers
@@ -21,6 +22,22 @@ namespace GenSharp.Refactorings.Analyzers.Helpers
                 .Zip(childNodes.Skip(1), (c, n) => (Current: c, Next: n))
                 .Last(t => t.Current == node).Next;
             return sibling;
+        }
+
+        public static T WithPrependedLeadingTrivia<T>(this T node, IEnumerable<SyntaxTrivia> trivia) where T : SyntaxNode
+        {
+            var list = new SyntaxTriviaList();
+            list = list.AddRange(trivia);
+
+            return node.WithPrependedLeadingTrivia(list);
+        }
+
+        public static SyntaxToken WithPrependedLeadingTrivia(this SyntaxToken token, IEnumerable<SyntaxTrivia> trivia)
+        {
+            var list = new SyntaxTriviaList();
+            list = list.AddRange(trivia);
+
+            return token.WithPrependedLeadingTrivia(list);
         }
     }
 }
