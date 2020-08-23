@@ -1,4 +1,3 @@
-using System;
 using GenSharp.Refactorings.Analyzers.Analyzers;
 using GenSharp.Refactorings.Analyzers.CodeFixes;
 using Microsoft.CodeAnalysis;
@@ -82,7 +81,7 @@ class Program
 
             VerifyCSharpFix(test, fixtests, null, true);
         }
-        
+
         [TestMethod]
         public void ExtractMethod2()
         {
@@ -156,7 +155,7 @@ class Program
 
             VerifyCSharpFix(test, fixtests, null, true);
         }
-        
+
         [TestMethod]
         public void ExtractMethod3()
         {
