@@ -33,5 +33,8 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             enumType = null;
             return false;
         }
+
+        public static bool IsThisParameter(this ISymbol symbol)
+            => symbol?.Kind == SymbolKind.Parameter && ((IParameterSymbol)symbol).IsThis;
     }
 }

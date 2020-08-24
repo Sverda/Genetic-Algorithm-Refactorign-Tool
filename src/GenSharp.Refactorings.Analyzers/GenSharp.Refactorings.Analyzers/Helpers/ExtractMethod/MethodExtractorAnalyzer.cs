@@ -91,6 +91,11 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
             foreach (var symbol in candidates)
             {
+                if (symbol.IsThisParameter() || IsInteractiveSynthesizedParameter(symbol))
+                {
+                    continue;
+                }
+
                 var captured = capturedMap.Contains(symbol);
                 var dataFlowIn = dataFlowInMap.Contains(symbol);
                 var dataFlowOut = dataFlowOutMap.Contains(symbol);
@@ -145,6 +150,20 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
                 AddVariableToMap(variableInfoMap, symbol, CreateFromSymbol(model.Compilation, symbol, type, variableStyle, variableDeclared));
             }
+        }
+
+        private bool IsInteractiveSynthesizedParameter(ISymbol localOrParameter)
+        {
+            if (!(localOrParameter is IParameterSymbol parameter))
+            {
+                return false;
+            }
+
+            return parameter.IsImplicitlyDeclared &&
+                   parameter.ContainingAssembly.IsInteractive &&
+                   parameter.ContainingSymbol != null &&
+                   parameter.ContainingSymbol.ContainingType != null &&
+                   parameter.ContainingSymbol.ContainingType.IsScriptClass;
         }
 
         private bool TryGetVariableStyle(
