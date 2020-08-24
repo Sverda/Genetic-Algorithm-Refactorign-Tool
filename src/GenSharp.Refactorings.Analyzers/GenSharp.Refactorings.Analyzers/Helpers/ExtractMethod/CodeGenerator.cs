@@ -46,8 +46,9 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
         public MethodDeclarationSyntax GenerateMethodDefinition(CancellationToken cancellationToken)
         {
             var body = _selectionResult.AsBody();
-            body = AppendReturnStatementIfNeeded(body);
             body = SplitOrMoveDeclarationIntoMethodDefinition(body, cancellationToken);
+            body = AppendReturnStatementIfNeeded(body);
+            body = CleanupCode(body);
 
             var displayName = _analyzerResult.ReturnType.ToMinimalDisplayString(_semanticDocument.SemanticModel, 0);
             var returnType = SyntaxFactory.ParseTypeName(displayName);
@@ -78,6 +79,19 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             return string.IsNullOrEmpty(identifierName)
                 ? SyntaxFactory.ReturnStatement()
                 : SyntaxFactory.ReturnStatement(SyntaxFactory.IdentifierName(identifierName));
+        }
+
+        private BlockSyntax CleanupCode(BlockSyntax body)
+        {
+            var semanticModel = _semanticDocument.SemanticModel;
+            var context = _selectionResult.GetContainingScope();
+            var postProcessor = new PostProcessor(semanticModel, context.SpanStart);
+
+            var statements = postProcessor.RemoveRedundantBlock(body.Statements.ToList());
+            statements = postProcessor.RemoveDeclarationAssignmentPattern(statements);
+            statements = postProcessor.RemoveInitializedDeclarationAndReturnPattern(statements);
+
+            return SyntaxFactory.Block(statements);
         }
 
         private BlockSyntax SplitOrMoveDeclarationIntoMethodDefinition(BlockSyntax body, CancellationToken cancellationToken)

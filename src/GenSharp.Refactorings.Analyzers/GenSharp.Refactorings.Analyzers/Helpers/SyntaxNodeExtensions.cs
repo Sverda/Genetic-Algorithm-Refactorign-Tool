@@ -39,5 +39,12 @@ namespace GenSharp.Refactorings.Analyzers.Helpers
 
             return token.WithPrependedLeadingTrivia(list);
         }
+
+        public static SyntaxToken WithAppendedTrailingTrivia(
+            this SyntaxToken token,
+            IEnumerable<SyntaxTrivia> trivia)
+        {
+            return token.WithTrailingTrivia(token.TrailingTrivia.Concat(trivia));
+        }
     }
 }
