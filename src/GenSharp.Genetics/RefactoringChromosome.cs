@@ -10,6 +10,8 @@ namespace GenSharp.Genetics
         public RefactoringChromosome(int sequenceLength, string source) : base(sequenceLength)
         {
             Source = source;
+
+            CreateGenes();
         }
 
         public override Gene GenerateGene(int geneIndex)

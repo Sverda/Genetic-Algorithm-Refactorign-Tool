@@ -47,7 +47,7 @@ namespace ConsoleApplication1
             var mutation = new ReverseSequenceMutation();
             var fitness = new MetricsFitness();
             var chromosome = new RefactoringChromosome(3, source);
-            var population = new Population(50, 70, chromosome);
+            var population = new Population(20, 30, chromosome);
 
             var ga = new GeneticAlgorithm(population, fitness, selection, crossover, mutation)
             {

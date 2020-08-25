@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenSharp.Genetics.Test
@@ -70,9 +71,12 @@ namespace ConsoleApplication1
         }
     }
 }";
-            var factory = new RefactoringChromosome(2, source);
-            var chromosome = factory.GenerateGene(1);
-            Assert.IsNotNull(chromosome);
+            var factory = new RefactoringChromosome(3, source);
+            foreach (var i in Enumerable.Range(0, 30))
+            {
+                var gene = factory.GenerateGene(i);
+                Assert.IsNotNull(gene);
+            }
         }
     }
 }
