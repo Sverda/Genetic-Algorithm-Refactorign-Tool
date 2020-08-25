@@ -35,7 +35,7 @@ namespace ConsoleApplication1
         }
     }
 }";
-            var factory = new RefactoringChromosome(2, source);
+            var factory = new RefactoringChromosome(3, source);
             var chromosome = factory.GenerateGene(0);
             Assert.IsNotNull(chromosome);
         }

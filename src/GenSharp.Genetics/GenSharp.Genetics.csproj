@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MetricsFitness.cs" />
     <Compile Include="RefactoringChromosome.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -57,6 +58,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GenSharp.Metrics\GenSharp.Metrics.csproj">
+      <Project>{61B5705B-0EBE-4F85-A41D-8AFFC9DBFB79}</Project>
+      <Name>GenSharp.Metrics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GenSharp.Refactorings.Analyzers\GenSharp.Refactorings.Analyzers\GenSharp.Refactorings.Analyzers.csproj">
       <Project>{06F0F7E0-2A6D-46FC-9F0B-7671B6720AED}</Project>
       <Name>GenSharp.Refactorings.Analyzers</Name>

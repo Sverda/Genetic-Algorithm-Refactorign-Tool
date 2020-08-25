@@ -1,4 +1,5 @@
-﻿using GenSharp.Refactorings.Analyzers.Analyzers;
+﻿using System.Linq;
+using GenSharp.Refactorings.Analyzers.Analyzers;
 using GenSharp.Refactorings.Analyzers.Helpers.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -17,18 +18,27 @@ namespace GenSharp.Refactorings.Analyzers.Helpers
         public Diagnostic FromCode(int index)
         {
             var diagnostics = FromCode();
-            return index >= diagnostics.Length ? null : diagnostics[index];
+            return index >= diagnostics.Length ? diagnostics.FindExtractMethodDiagnostic() : diagnostics[index];
         }
 
         public Diagnostic[] FromCode()
         {
-            var analyzer = GetCSharpDiagnosticAnalyzer();
-            return DiagnosticVerifier.GetSortedDiagnostics(new[] { _source }, analyzer);
+            var analyzers = GetCSharpDiagnosticAnalyzers();
+            var diagnostics = analyzers
+                .SelectMany(
+                    analyzer => DiagnosticVerifier.GetSortedDiagnostics(new[] { _source }, analyzer), 
+                    (analyzer, diagnostic) => new {analyzers, diagnostic});
+            return diagnostics.Select(d => d.diagnostic).ToArray();
         }
 
-        private static DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
+        private static DiagnosticAnalyzer[] GetCSharpDiagnosticAnalyzers()
         {
-            return new ExtractStatementAnalyzer();
+            var analyzers = new DiagnosticAnalyzer[]
+            {
+                new ExtractStatementAnalyzer(),
+                new ExtractMethodAnalyzer()
+            };
+            return analyzers;
         }
     }
 }

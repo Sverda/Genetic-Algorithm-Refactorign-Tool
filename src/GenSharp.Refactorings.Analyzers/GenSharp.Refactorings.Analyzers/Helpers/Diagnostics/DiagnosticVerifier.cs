@@ -15,7 +15,6 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.Diagnostics
         private static readonly MetadataReference _systemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
         private static readonly MetadataReference _cSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         private static readonly MetadataReference _codeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
-        //private static readonly Type _cSharpReference = typeof(Microsoft.CodeAnalysis.CSharp.Formatting.CSharpFormattingOptions);
 
         internal static string DefaultFilePathPrefix = "Test";
         internal static string CSharpDefaultFileExt = "cs";
@@ -26,7 +25,7 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.Diagnostics
             return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources));
         }
 
-        private static Diagnostic[] GetSortedDiagnosticsFromDocuments(DiagnosticAnalyzer analyzer, Document[] documents)
+        public static Diagnostic[] GetSortedDiagnosticsFromDocuments(DiagnosticAnalyzer analyzer, Document[] documents)
         {
             var projects = new HashSet<Project>();
             foreach (var document in documents)
@@ -70,7 +69,7 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.Diagnostics
             return diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
         }
 
-        private static Document[] GetDocuments(string[] sources)
+        public static Document[] GetDocuments(string[] sources)
         {
             var project = CreateProject(sources);
             var documents = project.Documents.ToArray();

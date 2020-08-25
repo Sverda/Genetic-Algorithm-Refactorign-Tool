@@ -5,22 +5,22 @@ namespace GenSharp.Genetics
 {
     public class RefactoringChromosome : ChromosomeBase
     {
-        private readonly string _source;
+        public string Source { get; }
 
-        public RefactoringChromosome(int length, string source) : base(length)
+        public RefactoringChromosome(int sequenceLength, string source) : base(sequenceLength)
         {
-            _source = source;
+            Source = source;
         }
 
         public override Gene GenerateGene(int geneIndex)
         {
-            var diagnostics = new DiagnosticsExtractor(_source).FromCode(geneIndex);
+            var diagnostics = new DiagnosticsExtractor(Source).FromCode(geneIndex);
             return new Gene(diagnostics);
         }
 
         public override IChromosome CreateNew()
         {
-            return new RefactoringChromosome(Length, _source);
+            return new RefactoringChromosome(Length, Source);
         }
     }
 }
