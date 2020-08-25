@@ -47,6 +47,8 @@
   <ItemGroup>
     <Compile Include="Abstractions\IEvaluateMetric.cs" />
     <Compile Include="Implementations\CyclomaticComplexityMetrics.cs" />
+    <Compile Include="Implementations\LinesOfCodeMetrics.cs" />
+    <Compile Include="Implementations\MaintainabilityIndexMetrics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
