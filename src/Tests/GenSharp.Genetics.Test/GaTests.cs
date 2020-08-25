@@ -144,7 +144,7 @@ namespace ConsoleApplication1
             var crossover = new OrderedCrossover();
             var mutation = new ReverseSequenceMutation();
             var fitness = new MetricsFitness<MaintainabilityIndexMetrics>();
-            var chromosome = new RefactoringChromosome(10, source);
+            var chromosome = new RefactoringChromosome(5, source);
             var population = new Population(20, 30, chromosome);
 
             var ga = new GeneticAlgorithm(population, fitness, selection, crossover, mutation)

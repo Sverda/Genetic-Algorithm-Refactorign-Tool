@@ -64,9 +64,18 @@ namespace GenSharp.Refactorings.Analyzers.Helpers
             foreach (var identifier in identifiers)
             {
                 var containingClass = identifier.Parent.AncestorsAndSelf().OfType<ClassDeclarationSyntax>().Single();
-                var isField = containingClass.Members.OfType<FieldDeclarationSyntax>()
+                var isField = containingClass
+                    .Members.OfType<FieldDeclarationSyntax>()
                     .Any(field => field.Declaration.Variables.Any(variable => variable.Identifier.ValueText.Equals(identifier.ValueText)));
                 if (isField)
+                {
+                    continue;
+                }
+
+                var isMethod = containingClass
+                    .Members.OfType<MethodDeclarationSyntax>()
+                    .Any(method => method.Identifier.ValueText == identifier.ValueText);
+                if (isMethod)
                 {
                     continue;
                 }

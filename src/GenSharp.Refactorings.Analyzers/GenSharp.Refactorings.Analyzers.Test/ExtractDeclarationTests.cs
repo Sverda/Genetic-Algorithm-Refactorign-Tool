@@ -402,6 +402,91 @@ namespace ConsoleApplication1
             VerifyCSharpFix(test, fixtest);
         }
 
+        [TestMethod]
+        public void NestedMethod()
+        {
+            const string test = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Diagnostics;
+
+namespace ConsoleApplication1
+{
+    class Calculations
+    {
+        double CalculateTotal(int quantity, int itemPrice)
+        {
+            double basePrice = Extracted(quantity, itemPrice);
+
+            if (basePrice > 1000)
+            {
+                return basePrice * 0.95;
+            }
+            else
+            {
+                return basePrice * 0.98;
+            }
+        }
+        
+        private double Extracted(int quantity, int itemPrice)
+        {
+            return quantity * itemPrice;
+        }
+    }
+}";
+            var expected = new DiagnosticResult
+            {
+                Id = DiagnosticIdentifiers.ExtractStatement,
+                Message = DiagnosticDescriptors.ExtractStatement.MessageFormat.ToString(),
+                Severity = DiagnosticSeverity.Hidden,
+                Locations = new[]
+                {
+                    new DiagnosticResultLocation("Test0.cs", 15, 20)
+                }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+
+            const string fixtest = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Diagnostics;
+
+namespace ConsoleApplication1
+{
+    class Calculations
+    {
+        double CalculateTotal(int quantity, int itemPrice)
+        {
+            if (basePrice(quantity, itemPrice) > 1000)
+            {
+                return basePrice(quantity, itemPrice) * 0.95;
+            }
+            else
+            {
+                return basePrice(quantity, itemPrice) * 0.98;
+            }
+        }
+
+        private double Extracted(int quantity, int itemPrice)
+        {
+            return quantity * itemPrice;
+        }
+        double basePrice(int quantity, int itemPrice)
+        {
+            return Extracted(quantity, itemPrice);
+        }
+    }
+}";
+            VerifyCSharpFix(test, fixtest);
+        }
+
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
             return new ExtractStatementCodeFix();

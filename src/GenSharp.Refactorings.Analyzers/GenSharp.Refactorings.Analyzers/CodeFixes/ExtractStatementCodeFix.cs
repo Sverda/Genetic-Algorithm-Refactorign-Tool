@@ -34,7 +34,11 @@ namespace GenSharp.Refactorings.Analyzers.CodeFixes
             var diagnostic = context.Diagnostics.First();
             var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-            var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<VariableDeclarationSyntax>().First();
+            var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<VariableDeclarationSyntax>().FirstOrDefault();
+            if (declaration is null)
+            {
+                return;
+            }
 
             var codeAction = CodeAction.Create(DiagnosticDescriptors.ExtractStatement.Title.ToString(), c => ExtractVariableDeclarationAsync(context.Document, declaration, c));
             context.RegisterCodeFix(codeAction, diagnostic);
