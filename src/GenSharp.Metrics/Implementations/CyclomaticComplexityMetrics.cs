@@ -6,11 +6,13 @@ namespace GenSharp.Metrics.Implementations
 {
     public class CyclomaticComplexityMetrics : IEvaluateMetric
     {
-        private readonly string _source;
+        private string _source;
 
-        public CyclomaticComplexityMetrics(string source)
+        public IEvaluateMetric SetSource(string source)
         {
             _source = source;
+
+            return this;
         }
 
         public double Evaluate()

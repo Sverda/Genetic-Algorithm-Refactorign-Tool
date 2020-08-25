@@ -37,7 +37,8 @@ namespace ConsoleApplication1
     }
 }";
 
-            var metrics = new CyclomaticComplexityMetrics(source);
+            var metrics = new CyclomaticComplexityMetrics()
+                .SetSource(source);
             var value = metrics.Evaluate();
 
             Assert.AreEqual(2, value);
@@ -74,7 +75,8 @@ namespace ConsoleApplication1
     }
 }";
 
-            var metrics = new MaintainabilityIndexMetrics(source);
+            var metrics = new MaintainabilityIndexMetrics()
+                .SetSource(source);
             var value = metrics.Evaluate();
 
             Assert.AreEqual(77, value);
@@ -111,7 +113,8 @@ namespace ConsoleApplication1
     }
 }";
 
-            var metrics = new LinesOfCodeMetrics(source);
+            var metrics = new LinesOfCodeMetrics()
+                .SetSource(source);
             var value = metrics.Evaluate();
 
             Assert.AreEqual(4, value);
