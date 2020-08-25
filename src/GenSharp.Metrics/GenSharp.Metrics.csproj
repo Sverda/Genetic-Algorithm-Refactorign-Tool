@@ -32,6 +32,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,9 +46,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abstractions\IEvaluateMetric.cs" />
-    <Compile Include="Helpers\MaintainabilityIndexSettings.cs" />
-    <Compile Include="Implementations\MaintainabilityIndexMetrics.cs" />
+    <Compile Include="Implementations\CyclomaticComplexityMetrics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GenSharp.Refactorings.Analyzers\GenSharp.Refactorings.Analyzers\GenSharp.Refactorings.Analyzers.csproj">
+      <Project>{06F0F7E0-2A6D-46FC-9F0B-7671B6720AED}</Project>
+      <Name>GenSharp.Refactorings.Analyzers</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

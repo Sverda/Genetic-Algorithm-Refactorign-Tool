@@ -14,7 +14,7 @@ namespace GenSharp.Genetics
             var sequence = chromosome.GetGenes().Select(g => g.Value).Cast<Diagnostic>();
             var refactoringChromosome = chromosome as RefactoringChromosome;
             var newSource = CodeFixApplier.ComputeCodeFixes(refactoringChromosome.Source, sequence);
-            return new MaintainabilityIndexMetrics().Evaluate();
+            return new CyclomaticComplexityMetrics(newSource).Evaluate();
         }
     }
 }
