@@ -51,11 +51,18 @@ namespace ConsoleApplication1
 
             var ga = new GeneticAlgorithm(population, fitness, selection, crossover, mutation)
             {
-                Termination = new GenerationNumberTermination(100)
+                Termination = new GenerationNumberTermination(50)
             };
             ga.Start();
 
             Assert.IsNotNull(ga.BestChromosome.Fitness);
+            TestContext.WriteLine($"Best fitness is {ga.BestChromosome.Fitness} and source looks like: \n {ga.BestChromosome}");
         }
+
+        /// <summary>
+        ///  Gets or sets the test context which provides
+        ///  information about and functionality for the current test run.
+        ///</summary>
+        public TestContext TestContext { get; set; }
     }
 }

@@ -1,5 +1,7 @@
-﻿using GeneticSharp.Domain.Chromosomes;
+﻿using System.Linq;
+using GeneticSharp.Domain.Chromosomes;
 using GenSharp.Refactorings.Analyzers.Helpers;
+using Microsoft.CodeAnalysis;
 
 namespace GenSharp.Genetics
 {
@@ -23,6 +25,13 @@ namespace GenSharp.Genetics
         public override IChromosome CreateNew()
         {
             return new RefactoringChromosome(Length, Source);
+        }
+
+        public override string ToString()
+        {
+            var sequence = GetGenes().Select(g => g.Value).Cast<Diagnostic>();
+            var newSource = CodeFixApplier.ComputeCodeFixes(Source, sequence);
+            return newSource;
         }
     }
 }
