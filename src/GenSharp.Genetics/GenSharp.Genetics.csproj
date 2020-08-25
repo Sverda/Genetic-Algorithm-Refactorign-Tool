@@ -50,6 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GeneticParameters.cs" />
+    <Compile Include="GeneticRunner.cs" />
+    <Compile Include="MetricsKind.cs" />
     <Compile Include="MetricsFitness.cs" />
     <Compile Include="RefactoringChromosome.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

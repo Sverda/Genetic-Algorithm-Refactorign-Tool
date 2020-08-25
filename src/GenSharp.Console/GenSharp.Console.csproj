@@ -51,6 +51,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GenSharp.Genetics\GenSharp.Genetics.csproj">
+      <Project>{4AA66F36-7C0F-4B86-B5D3-1DE02A8100E5}</Project>
+      <Name>GenSharp.Genetics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GenSharp.Metrics\GenSharp.Metrics.csproj">
       <Project>{61B5705B-0EBE-4F85-A41D-8AFFC9DBFB79}</Project>
       <Name>GenSharp.Metrics</Name>
