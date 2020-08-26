@@ -81,6 +81,11 @@ namespace GenSharp.Refactorings.Analyzers.Helpers
                 }
 
                 var typeSymbol = _semanticModel.GetTypeInfo(identifier.Parent).Type;
+                if (typeSymbol is null)
+                {
+                    continue;
+                }
+
                 var typeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString());
                 var parameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier(identifier.ValueText)).WithType(typeSyntax);
                 parameters.Add(parameter);
