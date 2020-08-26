@@ -27,14 +27,14 @@ namespace GenSharp.Console
                 spinner.Text = "Reading configuration...";
                 var source = await ReadSource(options.FilePath);
                 spinner.Text = "Setting up the genetic algorithm...";
-                var runner = RunnerSetup(options);
+                var runner = RunnerSetup(options, source);
                 spinner.Text = "The genetic algorithm is running...";
-                runner.Run(source);
+                runner.Run();
                 spinner.Text = "The genetic algorithm ended. ";
             });
         }
 
-        private static GeneticRunner RunnerSetup(Options options)
+        private static GeneticRunner RunnerSetup(Options options, string source)
         {
             var gaParams = new GeneticParameters
             {
@@ -42,7 +42,8 @@ namespace GenSharp.Console
                 MinPopulation = 20,
                 MaxPopulation = 100,
                 Generations = 50,
-                MetricsKind = options.Metrics
+                MetricsKind = options.Metrics,
+                Source = source
             };
             var runner = new GeneticRunner(gaParams);
             return runner;
