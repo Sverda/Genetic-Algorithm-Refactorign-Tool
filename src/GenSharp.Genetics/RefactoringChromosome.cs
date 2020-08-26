@@ -24,12 +24,12 @@ namespace GenSharp.Genetics
 
         public override IChromosome CreateNew()
         {
-            return new RefactoringChromosome(Length, Source);
+            return new RefactoringChromosome(Length, ApplyFixes());
         }
 
         public override string ToString() => ApplyFixes();
 
-        private string ApplyFixes()
+        internal string ApplyFixes()
         {
             var sequence = GetGenes().Select(g => g.Value).Cast<Diagnostic>();
             var newSource = CodeFixApplier.ComputeCodeFixes(Source, sequence);

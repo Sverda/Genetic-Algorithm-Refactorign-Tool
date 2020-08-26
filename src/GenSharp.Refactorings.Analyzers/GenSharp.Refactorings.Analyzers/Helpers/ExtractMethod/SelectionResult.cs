@@ -26,10 +26,13 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
 
         private static IEnumerable<StatementSyntax> FindRandomExtractableCode(BaseMethodDeclarationSyntax extractFrom)
         {
-            var random = new Random();
             var statementsCount = extractFrom.Body.Statements.Count;
-            var startingPosition = random.Next(0, statementsCount);
-            var depth = random.Next(1,( statementsCount + 1) - startingPosition);
+            var startingPosition = BetterRandom.Between(0, statementsCount - 2);
+            var depth = BetterRandom.Between(1, statementsCount - startingPosition - 1);
+            if (startingPosition + depth >= statementsCount)
+            {
+                throw new ArgumentOutOfRangeException($"startingPosition = {startingPosition}, depth = {depth}");
+            }
 
             var returnNodes = new List<StatementSyntax>();
             for (var i = startingPosition; i < startingPosition + depth; i++)

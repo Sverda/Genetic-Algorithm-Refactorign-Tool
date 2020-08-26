@@ -18,7 +18,8 @@ namespace GenSharp.Refactorings.Analyzers.Helpers
         public Diagnostic FromCode(int index)
         {
             var diagnostics = FromCode();
-            return index >= diagnostics.Length ? diagnostics.FindExtractMethodDiagnostic() : diagnostics[index];
+            var randomIndex = BetterRandom.Between(0, diagnostics.Length);
+            return randomIndex >= diagnostics.Length ? diagnostics.FindExtractMethodDiagnostic() : diagnostics[index];
         }
 
         public Diagnostic[] FromCode()

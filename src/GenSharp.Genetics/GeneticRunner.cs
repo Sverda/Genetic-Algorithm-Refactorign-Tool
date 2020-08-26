@@ -36,7 +36,7 @@ namespace GenSharp.Genetics
         {
             var geneticAlgorithm = Configure();
             geneticAlgorithm.Start();
-            _result.BestChromosomeSource = (geneticAlgorithm.BestChromosome as RefactoringChromosome)?.Source;
+            _result.BestChromosomeSource = (geneticAlgorithm.BestChromosome as RefactoringChromosome)?.ApplyFixes();
         }
 
         private GeneticAlgorithm Configure()
