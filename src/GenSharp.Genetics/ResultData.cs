@@ -5,6 +5,7 @@ namespace GenSharp.Genetics
     public class ResultData
     {
         public List<double> Fitness { get; set; }
+        public string BestChromosomeSource { get; set; }
 
         public ResultData()
         {
