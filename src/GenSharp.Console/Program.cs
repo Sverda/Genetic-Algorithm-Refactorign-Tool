@@ -22,21 +22,27 @@ namespace GenSharp.Console
 
         private static async Task RunOptionsAsync(Options options)
         {
-            await Spinner.StartAsync("Starting...", async spinner =>
+            string source = null;
+            await Spinner.StartAsync("Reading configuration...", async spinner =>
             {
-                spinner.Text = "Reading configuration...";
-                var source = await ReadSource(options.FilePath);
-                spinner.Text = "Setting up the genetic algorithm...";
-                var runner = RunnerSetup(options, source);
-                spinner.Text = "The genetic algorithm is running...";
+                source = await ReadSource(options.FilePath);
+            });
+
+            GeneticRunner runner = null;
+            Spinner.Start("Setting up the genetic algorithm...", spinner =>
+            {
+                runner = RunnerSetup(options, source);
+            });
+            
+            Spinner.Start("The genetic algorithm is running...", spinner =>
+            {
                 runner.Run();
-                spinner.Text = "The genetic algorithm ended. ";
             });
         }
 
         private static GeneticRunner RunnerSetup(Options options, string source)
         {
-            var gaParams = new GeneticParameters
+            var @params = new GeneticParameters
             {
                 SequenceLength = 5,
                 MinPopulation = 20,
@@ -45,7 +51,7 @@ namespace GenSharp.Console
                 MetricsKind = options.Metrics,
                 Source = source
             };
-            var runner = new GeneticRunner(gaParams);
+            var runner = new GeneticRunner(@params);
             return runner;
         }
 

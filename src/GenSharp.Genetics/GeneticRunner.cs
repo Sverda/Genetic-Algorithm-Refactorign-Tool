@@ -12,6 +12,8 @@ namespace GenSharp.Genetics
 {
     public class GeneticRunner
     {
+        private ResultData _result;
+
         private int Generations { get; }
         private IFitness Fitness { get; }
         private IChromosome Chromosome { get; }
@@ -37,10 +39,28 @@ namespace GenSharp.Genetics
 
         private GeneticAlgorithm Configure()
         {
-            return new GeneticAlgorithm(Population, Fitness, Selection, Crossover, Mutation)
+            _result = new ResultData();
+            var geneticAlgorithm = new GeneticAlgorithm(Population, Fitness, Selection, Crossover, Mutation)
             {
                 Termination = new GenerationNumberTermination(Generations)
             };
+            geneticAlgorithm.GenerationRan += GeneticAlgorithmOnGenerationRan;
+            return geneticAlgorithm;
         }
+
+        private void GeneticAlgorithmOnGenerationRan(object sender, EventArgs e)
+        {
+            if (!(sender is GeneticAlgorithm ga))
+            {
+                throw new ArgumentNullException(nameof(sender));
+            }
+
+            if (ga.BestChromosome.Fitness != null)
+            {
+                _result.Fitness.Add(ga.BestChromosome.Fitness.Value);
+            }
+        }
+
+        public ResultData CollectResult() => _result;
     }
 }
