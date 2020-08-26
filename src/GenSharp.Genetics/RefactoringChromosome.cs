@@ -24,7 +24,7 @@ namespace GenSharp.Genetics
 
         public override IChromosome CreateNew()
         {
-            return new RefactoringChromosome(Length, ApplyFixes());
+            return new RefactoringChromosome(Length, Source);
         }
 
         public override string ToString() => ApplyFixes();

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GenSharp.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "-s C:\\Users\\Damian\\Downloads\\Results\\source1.cs -m CyclomaticComplexity -o C:\\Users\\Damian\\Downloads\\Results\\ga-cc.xml"
+    }
+  }
+}

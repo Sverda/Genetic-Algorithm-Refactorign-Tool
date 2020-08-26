@@ -1,9 +1,9 @@
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace GenSharp.Refactorings.Analyzers.Analyzers
 {
@@ -12,14 +12,21 @@ namespace GenSharp.Refactorings.Analyzers.Analyzers
     {
         public const string DiagnosticId = DiagnosticIdentifiers.ExtractStatement;
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ExtractStatement);
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
+            => ImmutableArray.Create(DiagnosticDescriptors.ExtractStatement);
 
         public override void Initialize(AnalysisContext context)
         {
             context.RegisterSyntaxNodeAction(actionContext =>
             {
-                var declaration = actionContext.Node.DescendantNodes().OfType<VariableDeclarationSyntax>().First();
-                var afterEqualitySign = declaration.DescendantNodes().OfType<VariableDeclaratorSyntax>().Single().Initializer.Value;
+                var declaration = actionContext.Node
+                    .DescendantNodes()
+                    .OfType<VariableDeclarationSyntax>()
+                    .First();
+                var afterEqualitySign = declaration
+                    .DescendantNodes()
+                    .OfType<VariableDeclaratorSyntax>()
+                    .Single()?.Initializer?.Value;
                 if (afterEqualitySign is LiteralExpressionSyntax)
                 {
                     return;
