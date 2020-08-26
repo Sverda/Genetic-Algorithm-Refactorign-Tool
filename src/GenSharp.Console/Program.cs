@@ -26,10 +26,7 @@ namespace GenSharp.Console
             System.Console.WriteLine("Setting up the genetic algorithm. ");
             var runner = RunnerSetup(opts);
             System.Console.WriteLine("The genetic algorithm is running... ");
-            var animation = new Spinner(10, 10);
-            animation.Start();
             runner.Run(source);
-            animation.Stop();
         }
 
         private static GeneticRunner RunnerSetup(Options opts)
