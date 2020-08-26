@@ -1,7 +1,9 @@
 ﻿using CommandLine;
 using GenSharp.Genetics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using Kurukuru;
 
 namespace GenSharp.Console
 {
@@ -21,12 +23,16 @@ namespace GenSharp.Console
 
         private static async Task RunOptionsAsync(Options opts)
         {
-            System.Console.WriteLine("Reading configuration. ");
-            var source = await ReadSource(opts.FilePath);
-            System.Console.WriteLine("Setting up the genetic algorithm. ");
-            var runner = RunnerSetup(opts);
-            System.Console.WriteLine("The genetic algorithm is running... ");
-            runner.Run(source);
+            await Spinner.StartAsync("Starting...", async spinner =>
+            {
+                spinner.Text = "Reading configuration...";
+                var source = await ReadSource(opts.FilePath);
+                spinner.Text = "Setting up the genetic algorithm...";
+                var runner = RunnerSetup(opts);
+                spinner.Text = "The genetic algorithm is running...";
+                runner.Run(source);
+                spinner.Text = "The genetic algorithm ended. ";
+            });
         }
 
         private static GeneticRunner RunnerSetup(Options opts)
