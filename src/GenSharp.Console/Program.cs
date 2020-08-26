@@ -1,13 +1,13 @@
-﻿using GenSharp.Genetics;
+﻿using CommandLine;
+using GenSharp.Genetics;
 using System.IO;
 using System.Threading.Tasks;
-using CommandLine;
 
 namespace GenSharp.Console
 {
     internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Parser.Default
                 .ParseArguments<Options>(args)
