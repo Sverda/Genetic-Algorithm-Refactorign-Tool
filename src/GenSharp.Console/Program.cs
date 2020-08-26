@@ -11,36 +11,44 @@ namespace GenSharp.Console
         private static void Main(string[] args)
         {
             Parser.Default
-                .ParseArguments<Options>(args)
+                .ParseArguments<CommandLineOptions>(args)
                 .WithParsed(RunOptions);
         }
 
-        private static void RunOptions(Options options)
+        private static void RunOptions(CommandLineOptions commandLineOptions)
         {
-            RunOptionsAsync(options).Wait();
+            RunOptionsAsync(commandLineOptions).Wait();
         }
 
-        private static async Task RunOptionsAsync(Options options)
+        private static async Task RunOptionsAsync(CommandLineOptions commandLineOptions)
         {
             string source = null;
             await Spinner.StartAsync("Reading configuration...", async spinner =>
             {
-                source = await ReadSource(options.FilePath);
+                source = await ReadSource(commandLineOptions.SourcePath);
             });
 
             GeneticRunner runner = null;
             Spinner.Start("Setting up the genetic algorithm...", spinner =>
             {
-                runner = RunnerSetup(options, source);
+                runner = RunnerSetup(commandLineOptions, source);
             });
             
             Spinner.Start("The genetic algorithm is running...", spinner =>
             {
                 runner.Run();
             });
+
+            Spinner.Start("Saving results...", spinner =>
+            {
+                var data = runner.CollectResult();
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(ResultData));
+                using var writer = new StreamWriter(commandLineOptions.OutputPath);
+                serializer.Serialize(writer, data);
+            });
         }
 
-        private static GeneticRunner RunnerSetup(Options options, string source)
+        private static GeneticRunner RunnerSetup(CommandLineOptions commandLineOptions, string source)
         {
             var @params = new GeneticParameters
             {
@@ -48,7 +56,7 @@ namespace GenSharp.Console
                 MinPopulation = 20,
                 MaxPopulation = 100,
                 Generations = 50,
-                MetricsKind = options.Metrics,
+                MetricsKind = commandLineOptions.ChoosenMetrics,
                 Source = source
             };
             var runner = new GeneticRunner(@params);
