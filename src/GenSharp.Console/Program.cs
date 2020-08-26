@@ -1,9 +1,8 @@
 ﻿using CommandLine;
 using GenSharp.Genetics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Kurukuru;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace GenSharp.Console
 {
@@ -16,26 +15,26 @@ namespace GenSharp.Console
                 .WithParsed(RunOptions);
         }
 
-        private static void RunOptions(Options opts)
+        private static void RunOptions(Options options)
         {
-            RunOptionsAsync(opts).Wait();
+            RunOptionsAsync(options).Wait();
         }
 
-        private static async Task RunOptionsAsync(Options opts)
+        private static async Task RunOptionsAsync(Options options)
         {
             await Spinner.StartAsync("Starting...", async spinner =>
             {
                 spinner.Text = "Reading configuration...";
-                var source = await ReadSource(opts.FilePath);
+                var source = await ReadSource(options.FilePath);
                 spinner.Text = "Setting up the genetic algorithm...";
-                var runner = RunnerSetup(opts);
+                var runner = RunnerSetup(options);
                 spinner.Text = "The genetic algorithm is running...";
                 runner.Run(source);
                 spinner.Text = "The genetic algorithm ended. ";
             });
         }
 
-        private static GeneticRunner RunnerSetup(Options opts)
+        private static GeneticRunner RunnerSetup(Options options)
         {
             var gaParams = new GeneticParameters
             {
@@ -43,7 +42,7 @@ namespace GenSharp.Console
                 MinPopulation = 20,
                 MaxPopulation = 100,
                 Generations = 50,
-                MetricsKind = opts.Metrics
+                MetricsKind = options.Metrics
             };
             var runner = new GeneticRunner(gaParams);
             return runner;

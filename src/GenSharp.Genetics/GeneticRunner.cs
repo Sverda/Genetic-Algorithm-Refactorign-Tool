@@ -28,7 +28,7 @@ namespace GenSharp.Genetics
         private GeneticAlgorithm ConfigureGeneticAlgorithm(string source)
         {
             var selection = new EliteSelection();
-            var crossover = new OrderedCrossover();
+            var crossover = new OnePointCrossover();
             var mutation = new ReverseSequenceMutation();
             var fitness = ResolveMetricsKind();
             var chromosome = new RefactoringChromosome(_parameters.SequenceLength, source);
