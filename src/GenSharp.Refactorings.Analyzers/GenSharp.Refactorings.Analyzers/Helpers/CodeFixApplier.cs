@@ -34,7 +34,7 @@ namespace GenSharp.Refactorings.Analyzers.Helpers
                 case DiagnosticIdentifiers.ExtractMethod:
                     return new ExtractMethodCodeFix();
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(diagnosticId));
+                    throw new ArgumentOutOfRangeException(nameof(diagnosticId), $"Value is: {diagnosticId}");
             }
         }
 
