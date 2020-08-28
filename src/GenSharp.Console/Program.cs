@@ -55,7 +55,7 @@ namespace GenSharp.Console
                 SequenceLength = 5,
                 MinPopulation = 20,
                 MaxPopulation = 30,
-                Generations = 20,
+                Generations = 50,
                 MetricsKind = commandLineOptions.ChoosenMetrics,
                 Source = source
             };
