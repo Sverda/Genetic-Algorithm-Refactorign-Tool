@@ -35,8 +35,10 @@ namespace GenSharp.Genetics
         public void Run()
         {
             var geneticAlgorithm = Configure();
+            _result.InitialFitness = Chromosome.FullEvaluation();
             geneticAlgorithm.Start();
             _result.BestChromosomeSource = (geneticAlgorithm.BestChromosome as RefactoringChromosome)?.ApplyFixes();
+            _result.FinalFitness = geneticAlgorithm.BestChromosome.FullEvaluation();
         }
 
         private GeneticAlgorithm Configure()
