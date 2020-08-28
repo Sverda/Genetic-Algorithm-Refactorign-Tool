@@ -29,13 +29,14 @@ namespace GenSharp.Refactorings.Analyzers.Helpers.ExtractMethod
             var statementsCount = extractFrom.Body.Statements.Count;
             var startingPosition = BetterRandom.Between(0, statementsCount - 2);
             var depth = BetterRandom.Between(1, statementsCount - startingPosition - 1);
-            if (startingPosition + depth >= statementsCount)
+            var constraint = startingPosition + depth;
+            if (statementsCount < constraint)
             {
                 throw new ArgumentOutOfRangeException($"startingPosition = {startingPosition}, depth = {depth}");
             }
 
             var returnNodes = new List<StatementSyntax>();
-            for (var i = startingPosition; i < startingPosition + depth; i++)
+            for (var i = startingPosition; i < constraint; i++)
             {
                 var node = extractFrom.Body.Statements[i];
                 if (node != null) 

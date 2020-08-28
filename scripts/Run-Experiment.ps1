@@ -1,7 +1,7 @@
 Set-Location C:\Users\Damian\source\repos\GenSharp\src\GenSharp.Console\bin\Debug\netcoreapp3.1\
 
 $outputFolder = "C:\Users\Damian\Downloads\Results"
-$sets = 1..5
+$sets = 1..1
 $sources = "C:\Users\Damian\Downloads\Results\source1.cs", "C:\Users\Damian\Downloads\Results\source2.cs"
 foreach ($source in $sources) {
     foreach ($set in $sets) {

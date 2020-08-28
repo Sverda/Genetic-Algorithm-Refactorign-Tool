@@ -65,6 +65,6 @@ namespace GenSharp.Genetics
             }
         }
 
-        public ResultData CollectResult() => _result;
+        public ResultData CollectResult() => _result.BuildCsv();
     }
 }
